@@ -1,4 +1,6 @@
 #include "app.hpp"
+#include <iostream>
+#include "prim_exception.hpp"
 
 
 #define WINDOW_WIDTH 1000
@@ -8,6 +10,20 @@
 int main()
 {
     nano::App app(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
+    int exitcode = 0;
+    try
+    {
+        int exitcode = app.run();
+    }
+    catch(const prim::Exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+    }
+    
 
-    return app.run();
+    return exitcode;
 }

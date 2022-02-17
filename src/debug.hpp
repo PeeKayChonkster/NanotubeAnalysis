@@ -13,12 +13,11 @@ namespace prim
     class Debug
     {
     private:
-        inline static std::pair<int, int> textPosition = { 5, 50 };
+        inline static std::pair<int, int> textPosition = { 5, 30 };
         inline static std::vector<std::string> lines = {};
         inline static std::vector<std::string> persistentLines = {};
-        inline static raylib::Color textColor = { 255u, 255u, 255u, 200u };
     public:
-        inline static int fontSize = 14;
+        inline static int fontSize = 26;
 
         inline static void printLine(std::string line)
         {
@@ -32,7 +31,7 @@ namespace prim
             persistentLines.push_back(std::move(line));
         }
 
-        inline static void draw()
+        inline static void draw(Color textColor = WHITE)
         {
             uint i;
             for(i = 0u; i < persistentLines.size(); ++i)
