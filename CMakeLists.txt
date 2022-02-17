@@ -22,5 +22,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
 target_link_libraries(${PROJECT_NAME} PUBLIC raylib)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "external/raylib-cpp/include")
+target_include_directories(${PROJECT_NAME} PUBLIC "external/raylib/src")
+target_include_directories(${PROJECT_NAME} PUBLIC "external/raylib/src/extras")
 
 

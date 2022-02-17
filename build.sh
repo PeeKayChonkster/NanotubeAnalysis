@@ -15,7 +15,7 @@ configure() {
 build() {
     echo -e "Building..."
     cmake --build $CMAKE_BUILD_DIR --config $BUILD_TYPE || (configure && cmake --build $CMAKE_BUILD_DIR --config $BUILD_TYPE)
-    cp -R ./res $CMAKE_BUILD_DIR/bin/res
+    cp -R ./res $CMAKE_BUILD_DIR/bin
 }
 
 build_and_run() {

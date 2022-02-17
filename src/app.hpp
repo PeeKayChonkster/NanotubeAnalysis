@@ -2,6 +2,7 @@
 #define APP_HPP
 
 #include <raylib-cpp.hpp>
+#include "nanotube.hpp"
 
 namespace nano
 {
@@ -13,7 +14,7 @@ private:
 
     int init();
 public:
-    App(int windowWidth, int widnowHeight, char* windowName);
+    App(int windowWidth, int widnowHeight, const char* windowName);
     App(const App& other) = delete;
 
     int run();
