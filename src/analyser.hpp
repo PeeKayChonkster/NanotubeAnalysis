@@ -17,6 +17,7 @@ private:
     const raylib::Color maskColorNeg = { 0, 0, 0, 0 };
     const uint16_t minPixelsInTube = 50u;
     const uint32_t maxAdjacentPixels = 20000u;
+    const float extremumDelta = 0.005f;
     std::vector<Nanotube> nanotubes;
 
     std::vector<Point> addAdjacentPixels(int x, int y, bool* checkArray, uint32_t stackDepth);
@@ -26,7 +27,8 @@ public:
 
     void setTargetImg(const raylib::Image* targetImg);
     void calculateMask(float threshold);
-    void findNanotubes();
+    void scanMask();
+    void findExtremum();
     const raylib::Image* getMask() const;
     const std::vector<Nanotube>* getTubes() const;
 };

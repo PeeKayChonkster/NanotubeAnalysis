@@ -11,14 +11,16 @@ nano::App::App(int windowWidth, int windowHeight, const char* windowName): windo
 int nano::App::init()
 {
     SetTargetFPS(30);
+
+    ::GuiLoadStyle("./res/ui_styles/nano.rgs");
+    Font font = ::LoadFontEx("./res/fonts/Lato-Regular.ttf", 14, NULL, 0);
+    ::GuiSetFont(font);
+
     return 0;
 }
     
 void nano::App::drawUI()
 {
-    ::GuiLabel({ 5, 100, 70, 30}, "Alpha Threshold");
-    ::GuiTextBox({ 100, 100, 50, 20 }, inputThreshold, 6, true); 
-    calculateButtonPressed = ::GuiButton({ 5, 150, 100, 30 }, "Calculate");
 }
 
 int nano::App::run()
@@ -31,7 +33,7 @@ int nano::App::run()
     mainImg.Format(PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
     Analyser analyser(&mainImg);
     analyser.calculateMask(threshold);
-    analyser.findNanotubes();
+    analyser.findExtremum();
     raylib::Texture mainTexture(mainImg);
     raylib::Texture maskTexture(*analyser.getMask());
     window.SetSize(mainTexture.GetSize());
@@ -53,26 +55,10 @@ int nano::App::run()
 
         drawUI();
        
-        if(calculateButtonPressed)
-        {
-            DrawText("Calculating...", window.GetWidth() / 2.0f - GetTextWidth("Calculating..."), window.GetHeight() / 2.0f, 30, BLUE);
-            window.EndDrawing();
-            float value = std::stof(inputThreshold);
-            if (value >= 0.0 && value <= 1.0)
-            {
-                threshold = value;
-                analyser.calculateMask(threshold);
-                analyser.findNanotubes();
-                maskTexture.Update(analyser.getMask()->GetData());
-            }
-        }
-        else
-        {
-            DrawText(("Nanotubes: " + std::to_string(analyser.getTubes()->size())).c_str(), 5, 50, 26, BLUE);
-            prim::Debug::draw(RED);
-            
-            window.EndDrawing();
-        }
+        DrawText(("Nanotubes: " + std::to_string(analyser.getTubes()->size())).c_str(), 5, 50, 26, BLUE);
+        prim::Debug::draw(RED);
+        
+        window.EndDrawing();
         //--------------//
     }
 

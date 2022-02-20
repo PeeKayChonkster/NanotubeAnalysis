@@ -1,6 +1,7 @@
 #include "analyser.hpp"
 #include "prim_exception.hpp"
 #include <raygui.h>
+#include <iostream>
 
 nano::Analyser::Analyser(const raylib::Image* targetImg): targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
 {
@@ -42,7 +43,7 @@ void nano::Analyser::calculateMask(float threshold)
     delete[] checkArray;
 }
 
-void nano::Analyser::findNanotubes()
+void nano::Analyser::scanMask()
 {
     nanotubes.clear();
     bool* checkArray = new bool[mask.width * mask.height] { false };
@@ -220,6 +221,36 @@ std::vector<nano::Point> nano::Analyser::addAdjacentPixels(int x, int y, bool* c
     }
 
     return std::move(points);
+}
+
+void nano::Analyser::findExtremum()
+{
+    float threshold = 1.0f;
+    calculateMask(threshold);
+    scanMask();
+    uint32_t currNumberOfTubes = nanotubes.size();
+    uint32_t prevNumberOfTubes = currNumberOfTubes;
+    while(true)
+    {
+        threshold -= extremumDelta;
+        calculateMask(threshold);
+        scanMask();
+        currNumberOfTubes = nanotubes.size();
+        std::cout << "Nanotubes = " << currNumberOfTubes << std::endl;
+        if(currNumberOfTubes < prevNumberOfTubes)
+        {
+            // TODO: Optimize this block by caching results of the previous scan
+            threshold += extremumDelta;
+            calculateMask(threshold);
+            scanMask();
+            return;
+        }
+        else
+        {
+            prevNumberOfTubes = currNumberOfTubes;
+        }
+    }
+    
 }
 
 const raylib::Image* nano::Analyser::getMask() const

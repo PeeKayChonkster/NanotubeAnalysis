@@ -14,7 +14,7 @@ private:
 
     int init();
     void drawUI();
-    char inputThreshold[4] = {0};
+    char inputThreshold[4] {0};
     bool calculateButtonPressed = false;
 public:
     App(int windowWidth, int widnowHeight, const char* windowName);
