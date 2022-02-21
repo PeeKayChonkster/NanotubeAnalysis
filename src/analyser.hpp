@@ -17,11 +17,15 @@ private:
     const raylib::Color maskColorNeg = { 0, 0, 0, 0 };
     const uint16_t minPixelsInTube = 50u;
     const uint32_t maxAdjacentPixels = 20000u;
-    const float extremumDelta = 0.005f;
+    const float extremumDelta = 0.05f;
+    const uint8_t extremumOverfloatMax = 1u;
+    float progress = 1.0f;
     std::vector<Nanotube> nanotubes;
 
     std::vector<Point> addAdjacentPixels(int x, int y, bool* checkArray, uint32_t stackDepth);
+    void setProgress(float prog);
 public:
+    Analyser();
     Analyser(const raylib::Image* targetImg);
     Analyser(const Analyser& other) = delete;
 
@@ -31,6 +35,7 @@ public:
     void findExtremum();
     const raylib::Image* getMask() const;
     const std::vector<Nanotube>* getTubes() const;
+    float getProgress() const;
 };
 
 }  // namespace nano

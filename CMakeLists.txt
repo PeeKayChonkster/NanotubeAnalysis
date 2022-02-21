@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR}bin)
 
 set(PROJECT_SRC
     main.cpp app.cpp analyser.cpp
-    nanotube.cpp
+    nanotube.cpp ui.cpp
     )
 
 list(TRANSFORM PROJECT_SRC PREPEND "src/")

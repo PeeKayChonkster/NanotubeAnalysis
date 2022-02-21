@@ -3,56 +3,61 @@
 #include <raygui.h>
 #include <iostream>
 
+
+nano::Analyser::Analyser(): targetImg(nullptr) { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
+
 nano::Analyser::Analyser(const raylib::Image* targetImg): targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
 {
-    mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); 
+    mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1);
     setTargetImg(targetImg);
 }
 
 void nano::Analyser::setTargetImg(const raylib::Image* targetImg)
 {
     this->targetImg = targetImg;
-    mask.SetWidth(targetImg->width);
-    mask.SetHeight(targetImg->height);
+    mask = raylib::Image(targetImg->width, targetImg->height, maskColorNeg);
 }
 
 void nano::Analyser::calculateMask(float threshold)
 {
-    bool* checkArray = new bool[targetImg->width * targetImg->height] { false };
+    if(!targetImg) throw PRIM_EXCEPTION("Trying to calculate mask without target image.");
+    setProgress(0.0f);
+    uint32_t numberOfPixels = targetImg->width * targetImg->height;
 
     for(int y = 0; y < targetImg->height; ++y)
     {
         for(int x = 0; x < targetImg->width; ++x)
         {
-            const int idx = x + y * targetImg->width;
-            if(!checkArray[idx])
+            const uint32_t idx = x + y * targetImg->width;
+            setProgress(idx / (float)numberOfPixels);
+            float value = ::GetImageColor(*targetImg, x, y).r / 255.0f;
+            if(value >= threshold)
             {
-                checkArray[idx] = true;
-                float value = ::GetImageColor(*targetImg, x, y).r / 255.0f;
-                if(value >= threshold)
-                {
-                    mask.DrawPixel(x, y, maskColorPos);
-                }
-                else
-                {
-                    mask.DrawPixel(x, y, maskColorNeg);
-                }
+                mask.DrawPixel(x, y, maskColorPos);
+            }
+            else
+            {
+                mask.DrawPixel(x, y, maskColorNeg);
             }
         }
     }
-    delete[] checkArray;
+    setProgress(1.0f);
 }
 
 void nano::Analyser::scanMask()
 {
+    if(!targetImg) throw PRIM_EXCEPTION("Trying to scan mask without target image.");
+    setProgress(0.0f);
     nanotubes.clear();
-    bool* checkArray = new bool[mask.width * mask.height] { false };
+    uint32_t numberOfPixels = targetImg->width * targetImg->height;
+    bool* checkArray = new bool[numberOfPixels] { false };
 
     for(int y = 0; y < mask.height; ++y)
     {
         for(int x = 0; x < mask.width; ++x)
         {
             int idx = x + y * mask.width;
+            setProgress(idx / (float)numberOfPixels);
             if(!checkArray[idx])
             {
                 checkArray[idx] = true;
@@ -67,6 +72,7 @@ void nano::Analyser::scanMask()
             }
         }
     }
+    setProgress(1.0f);
     delete[] checkArray;
 }
 
@@ -225,9 +231,14 @@ std::vector<nano::Point> nano::Analyser::addAdjacentPixels(int x, int y, bool* c
 
 void nano::Analyser::findExtremum()
 {
+    if(!targetImg) throw PRIM_EXCEPTION("Trying to find nanotube extremum without target image.");
+    setProgress(0.0f);
     float threshold = 1.0f;
+    float extremumThreshold = 1.0f;
+    uint32_t extremumNumberOfTubes = 0u;
     calculateMask(threshold);
     scanMask();
+    uint8_t stopFlag = 0u;
     uint32_t currNumberOfTubes = nanotubes.size();
     uint32_t prevNumberOfTubes = currNumberOfTubes;
     while(true)
@@ -237,11 +248,25 @@ void nano::Analyser::findExtremum()
         scanMask();
         currNumberOfTubes = nanotubes.size();
         std::cout << "Nanotubes = " << currNumberOfTubes << std::endl;
-        if(currNumberOfTubes < prevNumberOfTubes)
+        if(currNumberOfTubes <= prevNumberOfTubes && currNumberOfTubes > 0u)
         {
-            // TODO: Optimize this block by caching results of the previous scan
-            threshold += extremumDelta;
-            calculateMask(threshold);
+            if(stopFlag == 0u && extremumNumberOfTubes < currNumberOfTubes)
+            {
+                extremumThreshold = threshold + extremumDelta;
+                extremumNumberOfTubes = prevNumberOfTubes;
+            }
+            ++stopFlag;
+        }
+        else
+        {
+            stopFlag = 0u;
+        }
+        if(stopFlag >= extremumOverfloatMax)
+        {
+            setProgress(1.0f);
+            std::cout << "Extremum threshold = " << extremumThreshold << std::endl;
+            std::cout << "Extremum number of tubes = " << extremumNumberOfTubes << std::endl;
+            calculateMask(extremumThreshold);
             scanMask();
             return;
         }
@@ -261,4 +286,14 @@ const raylib::Image* nano::Analyser::getMask() const
 const std::vector<nano::Nanotube>* nano::Analyser::getTubes() const
 {
     return &nanotubes;
+}
+
+void nano::Analyser::setProgress(float prog)
+{
+    progress = prog;
+}
+
+float nano::Analyser::getProgress() const
+{
+    return progress;
 }
