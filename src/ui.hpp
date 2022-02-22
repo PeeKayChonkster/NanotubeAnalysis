@@ -156,6 +156,30 @@ public:
     virtual void draw() override;
 };
 
+
+class ProgressBar : public Control
+{
+private:
+    float minValue;
+    float maxValue;
+    std::string textLeft;
+    std::string textRight;
+
+public:
+    ProgressBar(std::string name, raylib::Vector2 position);
+    ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue);
+    ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textLeft, std::string textRight);
+    virtual ~ProgressBar() = default;
+
+    virtual void draw() override;
+
+    float value;
+    bool centralize = true;
+    const float width = 250.0f;
+    const float height = 50.0f;
+};
+
+
 } // namespace nano
 
 #endif // UI_HPP

@@ -26,6 +26,11 @@ int nano::App::init()
     Button* calcButton = createUIElement<Button>("calcButton", "Calculate");
     calcButton->setCallback([this]()->void{this->startAnalysis();});
     mainPanel->addChild(calcButton);
+
+    auto temp = createUIElement<ProgressBar>("testProgressBar", raylib::Vector2(100.0f, 100.0f));
+    temp->value = 0.69f;
+    mainPanel->addChild(temp);
+
     ////////////////
 
     return 0;

@@ -233,6 +233,41 @@ void nano::MultiTextBox::draw()
     ::GuiSetStyle(TEXTBOX, TEXT_INNER_PADDING, 0);
     ::GuiFade(textColor.a / 255.0f);
     ::GuiTextBoxMulti(dest, const_cast<char*>(text.c_str()), text.length(), false);
+    
+    UI_DRAW_OVERRIDE
+}
+
+
+//--- ProgressBar ---//
+
+nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position) : ProgressBar(name, position, 0.0f, 1.0f) {}
+
+nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue) : ProgressBar(name, position, minValue, maxValue, "", "") {}
+
+nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textLeft, std::string textRight) :
+    Control(name), minValue(minValue), maxValue(maxValue), textLeft(textLeft), textRight(textRight), value(minValue)
+    {
+        bounds = raylib::Rectangle(position, { width, height });
+        backgroundColor = BLACK;
+    }
+
+void nano::ProgressBar::draw()
+{
+    if(!visible) return;
+
+    raylib::Rectangle dest;
+    dest.SetSize(width, height);
+    if(centralize)
+    {
+        raylib::Vector2 parentSize = parent->getSize();
+        dest.SetPosition(parent->getGlobalPosition() + (parentSize - getSize()) * 0.5f);
+    }
+    else
+    {
+        dest.SetPosition(getGlobalPosition());
+    }
+    ::DrawRectangleRec(dest,  backgroundColor);
+    ::GuiProgressBar(dest, textLeft.c_str(), textRight.c_str(), value, minValue, maxValue);
 
 
     UI_DRAW_OVERRIDE
