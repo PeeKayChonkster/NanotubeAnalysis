@@ -37,7 +37,7 @@ private:
     void setDroppedImg();
     void setWindowSize(raylib::Vector2 size);
     void alert(std::string message);
-    void free();
+
 
     template<class T, class... Args>
     T* createUIElement(Args&&... args)
@@ -55,6 +55,7 @@ public:
     App(const App& other) = delete;
 
     int run();
+    void free();
 };
 
 } // namespace nano

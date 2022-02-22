@@ -18,10 +18,12 @@ int main()
     catch(const prim::Exception& e)
     {
         std::cerr << e.what() << '\n';
+        app.free();
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
+        app.free();
     }
     
 

@@ -26,7 +26,6 @@ int nano::App::init()
     Button* calcButton = createUIElement<Button>("calcButton", "Calculate");
     calcButton->setCallback([this]()->void{this->startAnalysis();});
     mainPanel->addChild(calcButton);
-    createUIElement<WindowBox>("testBox", raylib::Rectangle{ 50, 50, 200, 200 }, RED, "TEST BOX");
     ////////////////
 
     return 0;
@@ -85,9 +84,21 @@ void nano::App::setWindowSize(raylib::Vector2 size)
 
 void nano::App::alert(std::string message)
 {
-    ////////////////////////
-    // UNDER CONSTRUCTION //
-    ////////////////////////
+    const uint8_t fontSize = 14u;
+    const uint8_t maxWidth = 250u;
+    raylib::Vector2 textSize = ::MeasureTextEx(::GetFontDefault(), message.c_str(), fontSize, 1);
+    const uint8_t rows = textSize.x / maxWidth + 1u;
+    float boxWidth = maxWidth;
+    float boxHeight = rows * textSize.y * 2.0f; // rows + distance between rows
+    raylib::Rectangle alertRect((window.GetWidth() - boxWidth) * 0.5, (window.GetHeight() - boxHeight) * 0.5f, boxWidth, boxHeight);
+    WindowBox* box = createUIElement<WindowBox>("alertBox", alertRect, RED, "Alert!");
+    alertRect.y = WINDOW_STATUSBAR_HEIGHT;
+    alertRect.x = 0.0f;
+    alertRect.height -= WINDOW_STATUSBAR_HEIGHT;
+    MultiTextBox* textBox = createUIElement<MultiTextBox>("alertTextBox", alertRect, BLANK, message);
+    textBox->textColor = BLACK;
+    textBox->fontSize = fontSize;
+    box->addChild(textBox);
 }
 
 int nano::App::run()
@@ -152,6 +163,12 @@ void nano::App::processControls()
 
 void nano::App::startAnalysis()
 {
+    if(!currImg.IsReady())
+    {
+        alert("There is no image to analyse!");
+        return;
+    }
+
     analyser.findExtremum();
     if(maskTexture)
     {

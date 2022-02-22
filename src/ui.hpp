@@ -14,6 +14,8 @@ namespace nano
 
 #define UI_DRAW_OVERRIDE drawChildren();
 
+#define WINDOW_STATUSBAR_HEIGHT 22
+
 
 class Control
 {
@@ -25,10 +27,10 @@ protected:
 
 public:
     Control(std::string name);
-    Control(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor = BLANK);
+    Control(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor = BLANK);
     virtual ~Control() = default;
 
-    raylib::Rectangle boundingRect;
+    raylib::Rectangle bounds;
     raylib::Color backgroundColor;
     std::vector<Control*> children;
     Control* parent = nullptr;
@@ -86,7 +88,7 @@ protected:
 public:
     Label(std::string name);
     Label(std::string name, std::string text);
-    Label(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor, std::string text);
+    Label(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor, std::string text);
     Label(std::string name, std::string text, raylib::Color textColor, uint8_t fontSize);
     virtual ~Label() = default;
 
@@ -110,7 +112,7 @@ protected:
 public:
     Button(std::string name);
     Button(std::string name, std::string text);
-    Button(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor, std::string text);
+    Button(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor, std::string text);
     virtual ~Button() = default;
 
     bool shrink = false;
@@ -126,11 +128,30 @@ class WindowBox: public Control
 {
 private:
     std::string title;
+    bool holdingMouse = false;
 public:
     WindowBox(std::string name);
     WindowBox(std::string name, std::string title);
-    WindowBox(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor, std::string title);
+    WindowBox(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor, std::string title);
     virtual ~WindowBox() = default;
+
+    virtual void draw() override;
+};
+
+
+class MultiTextBox : public Label
+{
+public:
+    MultiTextBox(std::string name);
+    MultiTextBox(std::string name, std::string text);
+    MultiTextBox(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor, std::string text);
+    MultiTextBox(std::string name, std::string text, raylib::Color textColor, uint8_t fontSize);
+    virtual ~MultiTextBox() = default;
+
+
+    uint8_t innerPadding;
+    uint8_t borderWidth = 3u;
+    //bool editMode = false;    always false for now
 
     virtual void draw() override;
 };
