@@ -6,6 +6,7 @@
 #include "analyser.hpp"
 #include "ui.hpp"
 #include <memory>
+#include <algorithm>
 
 namespace nano
 {
@@ -15,11 +16,13 @@ class App
 private:
     raylib::Window window;
     raylib::Image currImg;
+    std::string currImgPath;
     raylib::Texture* currTexture = nullptr;
     raylib::Texture* maskTexture = nullptr;
     Analyser analyser;
-    Control uiRoot;
-    std::vector<std::unique_ptr<Control>> uiElements;
+    Control* uiRoot;
+    raylib::Vector2 cameraPosition {};
+    float cameraZoom = 1.0f;
 
     // flags
     bool calculating = false;
@@ -39,10 +42,13 @@ private:
     template<class T, class... Args>
     T* createUIElement(Args&&... args)
     {
-        T* uiElelement = new T(std::forward<Args>(args)...);
-        uiElements.emplace_back(uiElelement);
-        return uiElelement;
+        T* uiElement = new T(std::forward<Args>(args)...);
+        uiRoot->addChild(uiElement);
+        return uiElement;
     }
+
+    void processControls();
+    void startAnalysis();
 
 public:
     App(int windowWidth, int widnowHeight, const char* windowName);

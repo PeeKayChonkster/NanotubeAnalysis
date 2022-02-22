@@ -17,7 +17,7 @@ namespace prim
         inline static std::vector<std::string> lines = {};
         inline static std::vector<std::string> persistentLines = {};
     public:
-        inline static int fontSize = 26;
+        inline static int fontSize = 22;
 
         inline static void printLine(std::string line)
         {

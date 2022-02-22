@@ -1,38 +1,40 @@
 #include "app.hpp"
 #include "debug.hpp"
 #include <iostream>
+#include <algorithm>
 
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
 
 nano::App::App(int windowWidth, int windowHeight, const char* windowName): 
     window(windowWidth, windowHeight, windowName), 
-    uiRoot("root", { 0, 0, windowWidth, windowHeight }) 
+    uiRoot(new Control("root", raylib::Rectangle { 0, 0, windowWidth, windowHeight }))
     {}
 
 int nano::App::init()
 {
     SetTargetFPS(60);
 
-    // GUI initialization
-    // ::GuiLoadStyle("./res/ui_styles/nano.rgs");
-    // uiFont = ::LoadFontEx("./res/fonts/Lato-Regular.ttf", uiFontSize, NULL, 0);
-    // ::GuiSetFont(uiFont);
-    Control* mainPanel = createUIElement<Control>("mainPanel", raylib::Rectangle(), WHITE);
+    // GUI SETUP //
+    const raylib::Color panelColor(255,255,255, 200);
+    Control* mainPanel = createUIElement<Control>("mainPanel", raylib::Rectangle(), panelColor);
     mainPanel->visible = false;
-    Label* dropInfo = createUIElement<Label>("dropInfo", raylib::Rectangle(), BLANK, "Drop image file for analysis");
-    dropInfo->fontSize = 22u;
-    dropInfo->sizePolicy = SizePolicy::SHRINK;
-    uiRoot.addChild(mainPanel);
-    uiRoot.addChild(dropInfo);
-
+    Label* dropInfo = createUIElement<Label>("dropInfo", "Drop image file for analysis", WHITE, 22u);
+    Label* imgPathInfo = createUIElement<Label>("imgPathInfo", "", BLACK, 16u);
+    imgPathInfo->backgroundColor = panelColor;
+    imgPathInfo->visible = false;
+    Button* calcButton = createUIElement<Button>("calcButton", "Calculate");
+    calcButton->setCallback([this]()->void{this->startAnalysis();});
+    mainPanel->addChild(calcButton);
+    createUIElement<WindowBox>("testBox", raylib::Rectangle{ 50, 50, 200, 200 }, RED, "TEST BOX");
+    ////////////////
 
     return 0;
 }
     
 void nano::App::drawUI()
 {
-    auto mainPanel = uiRoot.getChild<Control>("mainPanel");
+    auto mainPanel = uiRoot->getChild<Control>("mainPanel");
     if(::IsKeyPressed(KEY_TAB)) mainPanel->visible = !mainPanel->visible;
     if(mainPanel->visible)
     {
@@ -40,39 +42,13 @@ void nano::App::drawUI()
         mainPanel->setPosition({ 0, window.GetHeight() - mainPanel->getHeight() });
     }
 
-    auto dropInfo = uiRoot.getChild<Label>("dropInfo");
+    auto dropInfo = uiRoot->getChild<Label>("dropInfo");
     if(!currImg.IsReady())
     {
-        dropInfo->centralize(&window);
-    }
-    else
-    {
-        dropInfo->visible = false;
+        dropInfo->centralize();
     }
 
-    uiRoot.draw();
-    // if(!analyser.getTubes()->empty())
-    // {
-    //     std::string str("Nanotubes: " + std::to_string(analyser.getTubes()->size()));
-    //     raylib::Rectangle numberOfTubesRec(5, 5, MeasureTextEx(uiFont, str.c_str(), uiFontSize, 1.0f).x, 20);
-    //     ::GuiDrawRectangle(numberOfTubesRec, 1, BLACK, WHITE);
-    //     ::GuiLabel(numberOfTubesRec, str.c_str());
-    // }
-
-    // raylib::Rectangle calculateBtnRec { 5, 50, 80, 30 };
-    // if(currImg.IsReady())
-    // {
-    //     if(::GuiButton(calculateBtnRec, "Calculate"))
-    //     {
-    //         analyser.findExtremum();
-    //         if(maskTexture) delete maskTexture;
-    //         maskTexture = new raylib::Texture(*analyser.getMask());
-    //     }
-    // }
-    // else
-    // {
-    //     DrawText("Drop an image to analyse it", (window.GetSize().x - MeasureText("Drop an image to analyse it", 26)) * 0.5, window.GetSize().y / 2.0f - 14, 26, WHITE);
-    // }
+    uiRoot->draw();
 }
 
 void nano::App::setDroppedImg()
@@ -81,11 +57,16 @@ void nano::App::setDroppedImg()
     char** droppedFiles = GetDroppedFiles(&numberOfFiles);
     if(numberOfFiles > 0)
     {
-        currImg = raylib::Image(droppedFiles[0]);
+        currImg.Load(droppedFiles[0]);
+        currImgPath = std::move(droppedFiles[0]);
+        Label* imgPathInfo = uiRoot->getChild<Label>("imgPathInfo");
+        imgPathInfo->setText(currImgPath);
+        imgPathInfo->visible = true;
+        uiRoot->getChild<Label>("dropInfo")->visible = false;
         currImg.Format(PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
         if(currTexture) delete currTexture;
         currTexture = new raylib::Texture(currImg);
-        window.SetSize(currImg.GetSize());
+        setWindowSize(currImg.GetSize());
         analyser.setTargetImg(&currImg);
         std::cout << "Dropped file path: " << droppedFiles[0] << std::endl;
         ClearDroppedFiles();
@@ -95,8 +76,11 @@ void nano::App::setDroppedImg()
 
 void nano::App::setWindowSize(raylib::Vector2 size)
 {
+    int currentMonitor(::GetCurrentMonitor());
+    size.x = std::clamp(size.x, 0.0f, static_cast<float>(::GetMonitorWidth(currentMonitor)) * 0.7f);
+    size.y = std::clamp(size.y, 0.0f, static_cast<float>(::GetMonitorHeight(currentMonitor)) * 0.7f);
     window.SetSize(size);
-    uiRoot.setSize(size);
+    uiRoot->setSize(size);
 }
 
 void nano::App::alert(std::string message)
@@ -115,6 +99,7 @@ int nano::App::run()
     {
         //--- UPDATE ---//
         if(IsFileDropped()) setDroppedImg();
+        processControls();
         //--------------//
 
 
@@ -123,8 +108,8 @@ int nano::App::run()
         window.ClearBackground();
 
 
-        if(currTexture) currTexture->Draw();
-        if(maskTexture) maskTexture->Draw();
+        if(currTexture) currTexture->Draw(cameraPosition, 0.0f, cameraZoom);
+        if(maskTexture) maskTexture->Draw(cameraPosition, 0.0f, cameraZoom);
 
         drawUI();
 
@@ -142,4 +127,38 @@ void nano::App::free()
 {
     delete currTexture;
     delete maskTexture;
+    uiRoot->destroy();
+}
+
+void nano::App::processControls()
+{
+    raylib::Vector2 mousePos = ::GetMousePosition();
+    //prim::Debug::printLine(std::to_string(mousePos.x) + "|" + std::to_string(mousePos.y));
+
+    raylib::Vector2 mouseDelta = ::GetMouseDelta();
+    if(::IsMouseButtonDown(1))
+    {  
+        cameraPosition += mouseDelta;
+    }
+    
+    float wheelDelta = ::GetMouseWheelMove();
+    if(wheelDelta)
+    {
+        cameraZoom += wheelDelta * 0.02f;
+        cameraZoom = std::max(0.0f, cameraZoom);
+    }
+
+}
+
+void nano::App::startAnalysis()
+{
+    analyser.findExtremum();
+    if(maskTexture)
+    {
+        maskTexture->Update(analyser.getMask()->GetData());
+    }
+    else
+    {
+        maskTexture = new raylib::Texture(*analyser.getMask());
+    }
 }

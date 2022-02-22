@@ -6,38 +6,41 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <functional>
 #include "prim_exception.hpp"
 
 namespace nano
 {
 
-#define UI_DRAW_OVERRIDE if(!visible) return; drawChildren();
-
-enum class SizePolicy { FIXED, EXPAND, SHRINK };
+#define UI_DRAW_OVERRIDE drawChildren();
 
 
 class Control
 {
 protected:
     std::string name;
-    std::vector<Control*> children;
-    Control* parent = nullptr;
     void drawChildren();
+
+    static const uint8_t defaultFontSize = 20u;
 
 public:
     Control(std::string name);
     Control(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor = BLANK);
+    virtual ~Control() = default;
 
     raylib::Rectangle boundingRect;
     raylib::Color backgroundColor;
+    std::vector<Control*> children;
+    Control* parent = nullptr;
     bool visible = true;
-    SizePolicy sizePolicy = SizePolicy::FIXED;
 
     void addChild(Control* child);
-    void removeChild(Control* chlild);
+    void removeChild(Control* child);
+    void destroy();
     Control* getChild(std::string name);
     std::string getName() const;
     raylib::Vector2 getPosition() const;
+    raylib::Vector2 getGlobalPosition() const;
     void setPosition(raylib::Vector2 position);
     raylib::Vector2 getSize() const;
     void setSize(raylib::Vector2 size);
@@ -48,8 +51,6 @@ public:
     raylib::Color getBackgroundColor() const;
     void setBackgroundColor(raylib::Color color);
     void centralize();
-    void centralize(const Control* box);
-    void centralize(const raylib::Window* window);
 
     virtual void draw();
 
@@ -66,7 +67,7 @@ public:
             }
         }
         for(const auto& c : children)
-        {
+        {enum class SizePolicy { FIXED, EXPAND, SHRINK };
             child = c->getChild<T>(name);
             if(child) return child;
         }
@@ -86,14 +87,50 @@ public:
     Label(std::string name);
     Label(std::string name, std::string text);
     Label(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor, std::string text);
+    Label(std::string name, std::string text, raylib::Color textColor, uint8_t fontSize);
+    virtual ~Label() = default;
 
-    uint8_t fontSize = 16u;
+    uint8_t fontSize = defaultFontSize;
     raylib::Color textColor = WHITE;
 
 
     std::string_view getText() const;
     void setText(std::string text);
 
+
+    virtual void draw() override;
+};
+
+
+class Button : public Label
+{
+protected:
+    bool pressed = false;
+    std::function<void()> callback;
+public:
+    Button(std::string name);
+    Button(std::string name, std::string text);
+    Button(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor, std::string text);
+    virtual ~Button() = default;
+
+    bool shrink = false;
+
+    inline bool isPressed() const { return pressed; }
+    inline void setCallback(std::function<void()> callback) { this->callback = callback; }
+    
+    virtual void draw() override;
+};
+
+
+class WindowBox: public Control
+{
+private:
+    std::string title;
+public:
+    WindowBox(std::string name);
+    WindowBox(std::string name, std::string title);
+    WindowBox(std::string name, raylib::Rectangle boundingRect, raylib::Color backgroundColor, std::string title);
+    virtual ~WindowBox() = default;
 
     virtual void draw() override;
 };
