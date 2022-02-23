@@ -180,6 +180,22 @@ public:
 };
 
 
+class ValueInput : public Control
+{
+private:
+    float value;
+    float minValue, maxValue;
+    uint8_t length;
+    bool editMode = false;
+public:
+    ValueInput(std::string name, uint8_t length, raylib::Vector2 position);
+    ValueInput(std::string name, uint8_t length, raylib::Vector2 position, float minValue, float maxValue);
+    virtual ~ValueInput() = default;
+
+    virtual void draw() override;
+};
+
+
 } // namespace nano
 
 #endif // UI_HPP

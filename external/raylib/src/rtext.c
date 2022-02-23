@@ -1305,6 +1305,42 @@ int TextToInteger(const char *text)
     return value*sign;
 }
 
+// PRIM: get float value from text
+float TextToFloat(const char* text)
+{
+    float valueBeforeDot = 0.0f;
+    float valueAfterDot = 0.0f;
+    bool dot = false;
+    float multiplierAfterDot = 0.1f;
+    int sign = 1;
+
+    if ((text[0] == '+') || (text[0] == '-'))
+    {
+        if (text[0] == '-') sign = -1;
+        text++;
+    }
+
+    for (int i = 0; ((text[i] >= '0') && (text[i] <= '9') || (text[i] == '.')); ++i) 
+    {
+        if(text[i] == '.')
+        {
+            dot = true;
+            continue;
+        }
+        if(!dot)
+        {
+            valueBeforeDot = valueBeforeDot*10.0f + (float)(text[i] - '0');
+        }
+        else
+        {
+            valueAfterDot += (float)(text[i] - '0') * multiplierAfterDot;
+            multiplierAfterDot *= 0.1f;
+        }
+    }
+
+    return (valueBeforeDot + valueAfterDot)*sign;
+}
+
 #if defined(SUPPORT_TEXT_MANIPULATION)
 // Copy one string to another, returns bytes copied
 int TextCopy(char *dst, const char *src)

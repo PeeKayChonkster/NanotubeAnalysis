@@ -272,3 +272,46 @@ void nano::ProgressBar::draw()
 
     UI_DRAW_OVERRIDE
 }
+
+
+//--- ValueInput ---//
+
+nano::ValueInput::ValueInput(std::string name, uint8_t length, raylib::Vector2 position) : ValueInput(name, length, position, 0.0f, 1.0f) {}
+
+nano::ValueInput::ValueInput(std::string name, uint8_t length, raylib::Vector2 position, float minValue, float maxValue) :
+    Control(name), length(length), minValue(minValue), maxValue(maxValue)
+    {
+        bounds.SetPosition(position);
+    }
+
+void nano::ValueInput::draw()
+{
+    if(!visible) return;
+
+    raylib::Rectangle dest;
+    raylib::Vector2 textSize(::MeasureTextEx(::GetFontDefault(), "8", defaultFontSize, 1));
+    dest.SetPosition(getGlobalPosition());
+    
+    if(!editMode)
+    {
+        if(::IsMouseButtonPressed(0) && dest.CheckCollision(::GetMousePosition()))
+        {
+            editMode = true;
+        }
+    }
+    else
+    {
+        if(::IsMouseButtonPressed(0) && !dest.CheckCollision(::GetMousePosition()))
+        {
+            editMode = false;
+        }
+        else
+        {
+            
+        }
+    }
+
+    //::GuiValueBox(dest, "MAKE THIS A LABEL VARIABLE", &value, )
+
+    UI_DRAW_OVERRIDE
+}

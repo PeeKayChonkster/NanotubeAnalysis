@@ -501,7 +501,7 @@ RAYGUIAPI bool GuiCheckBox(Rectangle bounds, const char *text, bool checked);   
 RAYGUIAPI int GuiComboBox(Rectangle bounds, const char *text, int active);                              // Combo Box control, returns selected item index
 RAYGUIAPI bool GuiDropdownBox(Rectangle bounds, const char *text, int *active, bool editMode);          // Dropdown Box control, returns selected item
 RAYGUIAPI bool GuiSpinner(Rectangle bounds, const char *text, int *value, int minValue, int maxValue, bool editMode);     // Spinner control, returns selected value
-RAYGUIAPI bool GuiValueBox(Rectangle bounds, const char *text, int *value, int minValue, int maxValue, bool editMode);    // Value Box control, updates input text with numbers
+RAYGUIAPI bool GuiValueBox(Rectangle bounds, const char *text, float *value, float minValue, float maxValue, bool editMode);    // Value Box control, updates input text with numbers
 RAYGUIAPI bool GuiTextBox(Rectangle bounds, char *text, int textSize, bool editMode);                   // Text Box control, updates input text
 RAYGUIAPI bool GuiTextBoxMulti(Rectangle bounds, char *text, int textSize, bool editMode);              // Text Box control with multiple lines
 RAYGUIAPI float GuiSlider(Rectangle bounds, const char *textLeft, const char *textRight, float value, float minValue, float maxValue);       // Slider control, returns selected value
@@ -2048,7 +2048,7 @@ bool GuiSpinner(Rectangle bounds, const char *text, int *value, int minValue, in
     GuiControlState state = guiState;
 
     bool pressed = false;
-    int tempValue = *value;
+    float tempValue = *value;
 
     Rectangle spinner = { bounds.x + GuiGetStyle(SPINNER, SPIN_BUTTON_WIDTH) + GuiGetStyle(SPINNER, SPIN_BUTTON_PADDING), bounds.y,
                           bounds.width - 2*(GuiGetStyle(SPINNER, SPIN_BUTTON_WIDTH) + GuiGetStyle(SPINNER, SPIN_BUTTON_PADDING)), bounds.height };
@@ -2119,7 +2119,7 @@ bool GuiSpinner(Rectangle bounds, const char *text, int *value, int minValue, in
 
 // Value Box control, updates input text with numbers
 // NOTE: Requires static variables: frameCounter
-bool GuiValueBox(Rectangle bounds, const char *text, int *value, int minValue, int maxValue, bool editMode)
+bool GuiValueBox(Rectangle bounds, const char *text, float *value, float minValue, float maxValue, bool editMode)
 {
     #if !defined(VALUEBOX_MAX_CHARS)
         #define VALUEBOX_MAX_CHARS  32
@@ -2129,7 +2129,7 @@ bool GuiValueBox(Rectangle bounds, const char *text, int *value, int minValue, i
     bool pressed = false;
 
     char textValue[VALUEBOX_MAX_CHARS + 1] = "\0";
-    sprintf(textValue, "%i", *value);
+    sprintf(textValue, "%f", *value);
 
     Rectangle textBounds = { 0 };
     if (text != NULL)
@@ -2161,7 +2161,7 @@ bool GuiValueBox(Rectangle bounds, const char *text, int *value, int minValue, i
                 if (GetTextWidth(textValue) < bounds.width)
                 {
                     int key = GetCharPressed();
-                    if ((key >= 48) && (key <= 57))
+                    if ((key >= 48) && (key <= 57) || (key == 46))
                     {
                         textValue[keyCount] = (char)key;
                         keyCount++;
@@ -2182,7 +2182,7 @@ bool GuiValueBox(Rectangle bounds, const char *text, int *value, int minValue, i
                 }
             }
 
-            if (valueHasChanged) *value = TextToInteger(textValue);
+            if (valueHasChanged) *value = TextToFloat(textValue);
 
             if (IsKeyPressed(KEY_ENTER) || (!CheckCollisionPointRec(mousePoint, bounds) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) pressed = true;
         }
