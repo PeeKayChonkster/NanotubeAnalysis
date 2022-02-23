@@ -27,7 +27,6 @@ private:
     std::thread worker;
 
     // flags
-    bool workerAnalyzing = false;
     bool workerIsDone = false;
 
     char inputThreshold[4] {0};

@@ -99,7 +99,8 @@ void nano::Control::centralize()
 
 void nano::Control::draw()
 {
-    if(!visible) return;    
+    if(!visible) return;   
+    ::GuiLoadStyleDefault();
     ::DrawRectangleRec(raylib::Rectangle(getGlobalPosition(), getSize()),  backgroundColor);
     UI_DRAW_OVERRIDE
 }
@@ -125,6 +126,7 @@ void nano::Label::draw()
     if(!visible) return;
 
     bounds.SetSize(::MeasureTextEx(::GetFontDefault(), text.c_str(), fontSize, 1));
+    ::GuiLoadStyleDefault();
     ::DrawRectangleRec(raylib::Rectangle(getGlobalPosition(), getSize()),  backgroundColor);
     ::GuiSetStyle(DEFAULT, TEXT_SIZE, fontSize);
     ::GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, textColor);
@@ -149,6 +151,7 @@ void nano::Button::draw()
 
     if(shrink) setSize(::MeasureTextEx(::GetFontDefault(), text.c_str(), fontSize, 1));
     raylib::Rectangle dest(getGlobalPosition(), getSize());
+    ::GuiLoadStyleDefault();
     ::GuiSetStyle(DEFAULT, TEXT_SIZE, fontSize);
     ::GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, textColor);
     ::GuiSetStyle(BUTTON, BASE_COLOR_NORMAL, backgroundColor);
@@ -172,6 +175,7 @@ void nano::WindowBox::draw()
 {
     if(!visible) return;
 
+    ::GuiLoadStyleDefault();
     ::GuiSetStyle(STATUSBAR, TEXT_COLOR_NORMAL, raylib::Color::White());
     ::GuiSetStyle(STATUSBAR, BASE_COLOR_NORMAL, backgroundColor);
     ::GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, raylib::Color::Gray());
@@ -226,6 +230,7 @@ void nano::MultiTextBox::draw()
     if(!visible) return;
 
     raylib::Rectangle dest(getGlobalPosition(), getSize());
+    ::GuiLoadStyleDefault();
     ::GuiSetStyle(DEFAULT, TEXT_SIZE, fontSize);
     ::GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, textColor);
     ::GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, textColor);
@@ -270,7 +275,9 @@ void nano::ProgressBar::draw()
     ::DrawRectangleRec(dest,  backgroundColor);
     ::GuiProgressBar(dest, textLeft.c_str(), textRight.c_str(), value, minValue, maxValue);
 
+    ::GuiLoadStyleDefault();
     ::GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, raylib::Color::White());
+    ::GuiSetStyle(DEFAULT, TEXT_SIZE, fontSize);
     dest.y -= dest.height;
     ::GuiLabel(dest, textTop.c_str());
 

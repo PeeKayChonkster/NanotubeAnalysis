@@ -30,7 +30,7 @@ int nano::App::init()
     ValueInput* input = createUIElement<ValueInput>("valueInput", 5u, raylib::Vector2(70.0f, 50.0f), 0.0f, 1.0f, "Test");
     mainPanel->addChild(input);
 
-    ScrollPanel* testScrollPanel = createUIElement<ScrollPanel>("testScrollPanel", raylib::Rectangle(100.0f, 100.0f, 250.0f, 250.0f), BLACK, raylib::Vector2(500.0f, 500.0f));
+    ScrollPanel* testScrollPanel = createUIElement<ScrollPanel>("testScrollPanel", raylib::Rectangle(100.0f, 100.0f, 250.0f, 250.0f), GREEN, raylib::Vector2(500.0f, 500.0f));
     
 
     ////////////////
@@ -81,6 +81,8 @@ void nano::App::setDroppedImg()
             maskTexture = nullptr;
         }
         std::cout << "Dropped file path: " << droppedFiles[0] << std::endl;
+        cameraPosition = raylib::Vector2::Zero();
+        cameraZoom = 1.0f;
         ClearDroppedFiles();
     }
 
@@ -128,10 +130,9 @@ int nano::App::run()
         //--- UPDATE ---//
         if(IsFileDropped()) setDroppedImg();
         processControls();
-        if(workerAnalyzing && workerIsDone)
+        if(workerIsDone)
         {
             worker.join();
-            workerAnalyzing = false;
             workerIsDone = false;
             uiRoot->getChild<ProgressBar>("mainProgressBar")->destroy();
             setMaskTexture();
@@ -182,8 +183,9 @@ void nano::App::processControls()
     float wheelDelta = ::GetMouseWheelMove();
     if(wheelDelta)
     {
-        cameraZoom += wheelDelta * 0.02f;
-        cameraZoom = std::max(0.0f, cameraZoom);
+        float zoomMultiplier = ::IsKeyDown(KEY_LEFT_SHIFT)? 0.4f : 0.02f;
+        cameraZoom += wheelDelta * zoomMultiplier;
+        cameraZoom = std::max(0.01f, cameraZoom);
     }
 
 }
@@ -198,8 +200,6 @@ void nano::App::startAnalysis()
 
     ProgressBar* mainProgressBar = createUIElement<ProgressBar>("mainProgressBar", raylib::Vector2{0.0f,0.0f}, 0.0f, 1.0f, "Analysing image...");
     
-    workerIsDone = false;
-    workerAnalyzing = true;
     worker = std::thread([this, mainProgressBar]() {
         this->analyser.findExtremum(&mainProgressBar->value);
         this->workerIsDone = true;

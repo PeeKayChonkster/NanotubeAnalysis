@@ -165,6 +165,7 @@ private:
     std::string textLeft;
     std::string textRight;
     std::string textTop;
+    const uint8_t fontSize = 16u;
 
 public:
     ProgressBar(std::string name, raylib::Vector2 position);
