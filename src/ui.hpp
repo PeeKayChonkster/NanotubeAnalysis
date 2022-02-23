@@ -164,19 +164,20 @@ private:
     float maxValue;
     std::string textLeft;
     std::string textRight;
+    std::string textTop;
 
 public:
     ProgressBar(std::string name, raylib::Vector2 position);
-    ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue);
-    ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textLeft, std::string textRight);
+    ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textTop);
+    ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textTop, std::string textLeft, std::string textRight);
     virtual ~ProgressBar() = default;
 
     virtual void draw() override;
 
     float value;
     bool centralize = true;
-    const float width = 250.0f;
-    const float height = 50.0f;
+    const float width = 270.0f;
+    const float height = 30.0f;
 };
 
 
@@ -202,6 +203,27 @@ public:
     virtual void draw() override;
 
     inline float getValue() const { return value; }
+};
+
+
+class ScrollPanel : public Control
+{
+private:
+    raylib::Vector2 contentSize;
+    Control* contentControl = nullptr;
+    const raylib::Color defaultBackgroundColor = BLACK;
+    raylib::Vector2 scroll;
+public:
+    ScrollPanel(std::string name, raylib::Rectangle bounds);
+    ScrollPanel(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor, raylib::Vector2 contentSize);
+    virtual ~ScrollPanel() = default;
+
+    virtual void draw() override;
+
+    inline raylib::Vector2 getContentSize() const { return contentSize; }
+    inline void setContentSize(raylib::Vector2 newSize) { contentSize = newSize; }
+    inline void setContentWidth(uint8_t newWidth) { contentSize.x = newWidth; }
+    inline void setContentHeight(uint8_t newHeight) { contentSize.x = newHeight; }
 };
 
 

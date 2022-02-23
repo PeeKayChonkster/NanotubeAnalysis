@@ -21,7 +21,6 @@ void nano::Analyser::setTargetImg(const raylib::Image* targetImg)
 void nano::Analyser::calculateMask(float threshold)
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to calculate mask without target image.");
-    setProgress(0.0f);
     uint32_t numberOfPixels = targetImg->width * targetImg->height;
 
     for(int y = 0; y < targetImg->height; ++y)
@@ -29,7 +28,6 @@ void nano::Analyser::calculateMask(float threshold)
         for(int x = 0; x < targetImg->width; ++x)
         {
             const uint32_t idx = x + y * targetImg->width;
-            setProgress(idx / (float)numberOfPixels);
             float value = ::GetImageColor(*targetImg, x, y).r / 255.0f;
             if(value >= threshold)
             {
@@ -41,7 +39,6 @@ void nano::Analyser::calculateMask(float threshold)
             }
         }
     }
-    setProgress(1.0f);
 }
 
 void nano::Analyser::scanMask()
@@ -229,10 +226,10 @@ std::vector<nano::Point> nano::Analyser::addAdjacentPixels(int x, int y, bool* c
     return std::move(points);
 }
 
-void nano::Analyser::findExtremum()
+void nano::Analyser::findExtremum(float* progressReport)
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to find nanotube extremum without target image.");
-    setProgress(0.0f);
+    this->progressReport = progressReport;
     float threshold = 1.0f;
     float extremumThreshold = 1.0f;
     uint32_t extremumNumberOfTubes = 0u;
@@ -263,7 +260,6 @@ void nano::Analyser::findExtremum()
         }
         if(stopFlag >= extremumOverfloatMax)
         {
-            setProgress(1.0f);
             std::cout << "Extremum threshold = " << extremumThreshold << std::endl;
             std::cout << "Extremum number of tubes = " << extremumNumberOfTubes << std::endl;
             calculateMask(extremumThreshold);
@@ -284,16 +280,26 @@ const raylib::Image* nano::Analyser::getMask() const
 }
 
 const std::vector<nano::Nanotube>* nano::Analyser::getTubes() const
-{
+{ 
     return &nanotubes;
 }
 
 void nano::Analyser::setProgress(float prog)
 {
-    progress = prog;
+    if(progressReport)
+    {
+        *progressReport = prog;
+    }
 }
 
 float nano::Analyser::getProgress() const
 {
-    return progress;
+    if(progressReport)
+    {
+        return *progressReport;
+    }
+    else
+    {
+        return 0.0f;
+    }
 }

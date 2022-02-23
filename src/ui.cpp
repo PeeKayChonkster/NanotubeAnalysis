@@ -241,12 +241,12 @@ void nano::MultiTextBox::draw()
 
 //--- ProgressBar ---//
 
-nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position) : ProgressBar(name, position, 0.0f, 1.0f) {}
+nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position) : ProgressBar(name, position, 0.0f, 1.0f, "") {}
 
-nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue) : ProgressBar(name, position, minValue, maxValue, "", "") {}
+nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textTop) : ProgressBar(name, position, minValue, maxValue, textTop,"", "") {}
 
-nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textLeft, std::string textRight) :
-    Control(name), minValue(minValue), maxValue(maxValue), textLeft(textLeft), textRight(textRight), value(minValue)
+nano::ProgressBar::ProgressBar(std::string name, raylib::Vector2 position, float minValue, float maxValue, std::string textTop, std::string textLeft, std::string textRight) :
+    Control(name), minValue(minValue), maxValue(maxValue), textTop(textTop), textLeft(textLeft), textRight(textRight), value(minValue)
     {
         bounds = raylib::Rectangle(position, { width, height });
         backgroundColor = BLACK;
@@ -270,6 +270,9 @@ void nano::ProgressBar::draw()
     ::DrawRectangleRec(dest,  backgroundColor);
     ::GuiProgressBar(dest, textLeft.c_str(), textRight.c_str(), value, minValue, maxValue);
 
+    ::GuiSetStyle(LABEL, TEXT_COLOR_NORMAL, raylib::Color::White());
+    dest.y -= dest.height;
+    ::GuiLabel(dest, textTop.c_str());
 
     UI_DRAW_OVERRIDE
 }
@@ -327,6 +330,29 @@ void nano::ValueInput::draw()
     ::GuiTextBox(dest, textValue, length + 1u, editMode);
     dest.x -= dest.width;
     ::GuiLabel(dest, label.c_str());
+
+    UI_DRAW_OVERRIDE
+}
+
+
+//--- ScrollPanel ---//
+
+nano::ScrollPanel::ScrollPanel(std::string name, raylib::Rectangle bounds) :
+    ScrollPanel(name, bounds, defaultBackgroundColor, raylib::Vector2(0.0f,0.0f)) {}
+
+nano::ScrollPanel::ScrollPanel(std::string name, raylib::Rectangle bounds, raylib::Color backgroundColor, raylib::Vector2 contentSize) :
+    Control(name, bounds, backgroundColor), contentSize(contentSize) {}
+
+void nano::ScrollPanel::draw()
+{
+    if(!visible) return;
+
+    raylib::Rectangle dest(getGlobalPosition(), bounds.GetSize());
+    raylib::Rectangle contentRec;
+    contentRec.SetSize(contentSize);
+    ::GuiLoadStyleDefault();
+    ::GuiSetStyle(DEFAULT, BACKGROUND_COLOR, backgroundColor);
+    ::GuiScrollPanel(dest, contentRec, &scroll);
 
     UI_DRAW_OVERRIDE
 }

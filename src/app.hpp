@@ -7,6 +7,7 @@
 #include "ui.hpp"
 #include <memory>
 #include <algorithm>
+#include <thread>
 
 namespace nano
 {
@@ -23,9 +24,11 @@ private:
     Control* uiRoot;
     raylib::Vector2 cameraPosition {};
     float cameraZoom = 1.0f;
+    std::thread worker;
 
     // flags
-    bool calculating = false;
+    bool workerAnalyzing = false;
+    bool workerIsDone = false;
 
     char inputThreshold[4] {0};
     bool calculateButtonPressed = false;
@@ -37,6 +40,7 @@ private:
     void setDroppedImg();
     void setWindowSize(raylib::Vector2 size);
     void alert(std::string message);
+    void setMaskTexture();
 
 
     template<class T, class... Args>

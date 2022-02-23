@@ -24,11 +24,14 @@ int nano::App::init()
     imgPathInfo->backgroundColor = panelColor;
     imgPathInfo->visible = false;
     Button* calcButton = createUIElement<Button>("calcButton", "Calculate");
-    calcButton->setCallback([this]()->void{this->startAnalysis();});
+    calcButton->setCallback([this]()->void{ this->startAnalysis(); });
     mainPanel->addChild(calcButton);
 
     ValueInput* input = createUIElement<ValueInput>("valueInput", 5u, raylib::Vector2(70.0f, 50.0f), 0.0f, 1.0f, "Test");
     mainPanel->addChild(input);
+
+    ScrollPanel* testScrollPanel = createUIElement<ScrollPanel>("testScrollPanel", raylib::Rectangle(100.0f, 100.0f, 250.0f, 250.0f), BLACK, raylib::Vector2(500.0f, 500.0f));
+    
 
     ////////////////
 
@@ -116,11 +119,23 @@ int nano::App::run()
     int initCode = init();
     if(initCode != 0) return initCode;
 
+    raylib::Rectangle content(0, 0, 90, 200);
+    raylib::Vector2 scroll;
+
+
     while(!window.ShouldClose())
     {
         //--- UPDATE ---//
         if(IsFileDropped()) setDroppedImg();
         processControls();
+        if(workerAnalyzing && workerIsDone)
+        {
+            worker.join();
+            workerAnalyzing = false;
+            workerIsDone = false;
+            uiRoot->getChild<ProgressBar>("mainProgressBar")->destroy();
+            setMaskTexture();
+        }
         //--------------//
 
 
@@ -133,6 +148,8 @@ int nano::App::run()
         if(maskTexture) maskTexture->Draw(cameraPosition, 0.0f, cameraZoom);
 
         drawUI();
+
+
 
         prim::Debug::draw(RED);
         
@@ -179,7 +196,18 @@ void nano::App::startAnalysis()
         return;
     }
 
-    analyser.findExtremum();
+    ProgressBar* mainProgressBar = createUIElement<ProgressBar>("mainProgressBar", raylib::Vector2{0.0f,0.0f}, 0.0f, 1.0f, "Analysing image...");
+    
+    workerIsDone = false;
+    workerAnalyzing = true;
+    worker = std::thread([this, mainProgressBar]() {
+        this->analyser.findExtremum(&mainProgressBar->value);
+        this->workerIsDone = true;
+    });
+}
+
+void nano::App::setMaskTexture()
+{
     if(maskTexture)
     {
         maskTexture->Update(analyser.getMask()->GetData());
