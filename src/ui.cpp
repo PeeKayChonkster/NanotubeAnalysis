@@ -1,6 +1,7 @@
 #include "ui.hpp"
-#include <algorithm>
 #include "prim_exception.hpp"
+#include "debug.hpp"
+#include <algorithm>
 #include <iostream>
 
 //--- Control ---//
@@ -278,19 +279,28 @@ void nano::ProgressBar::draw()
 
 nano::ValueInput::ValueInput(std::string name, uint8_t length, raylib::Vector2 position) : ValueInput(name, length, position, 0.0f, 1.0f) {}
 
-nano::ValueInput::ValueInput(std::string name, uint8_t length, raylib::Vector2 position, float minValue, float maxValue) :
-    Control(name), length(length), minValue(minValue), maxValue(maxValue)
+nano::ValueInput::ValueInput(std::string name, uint8_t length, raylib::Vector2 position, float minValue, float maxValue, std::string label) :
+    Control(name), length(length), minValue(minValue), maxValue(maxValue), label(label)
     {
         bounds.SetPosition(position);
+        backgroundColor = GRAY;
     }
+
+nano::ValueInput::~ValueInput()
+{
+    delete[] textValue;
+}
 
 void nano::ValueInput::draw()
 {
     if(!visible) return;
 
+    ::GuiSetStyle(DEFAULT, TEXT_SIZE, fontSize);
+
     raylib::Rectangle dest;
-    raylib::Vector2 textSize(::MeasureTextEx(::GetFontDefault(), "8", defaultFontSize, 1));
+    raylib::Vector2 textSize(::MeasureTextEx(::GetFontDefault(), "8", fontSize, 1));
     dest.SetPosition(getGlobalPosition());
+    dest.SetSize((length + 1u) * textSize.x, textSize.y + TEXT_PADDING);   // +1 for dot
     
     if(!editMode)
     {
@@ -305,13 +315,18 @@ void nano::ValueInput::draw()
         {
             editMode = false;
         }
-        else
-        {
-            
-        }
     }
 
-    //::GuiValueBox(dest, "MAKE THIS A LABEL VARIABLE", &value, )
+    if((textValue[0] >= 48) && (textValue[0] <= 57))
+    {
+        value = std::stof(textValue);
+        value = std::clamp(value, minValue, maxValue);
+    }
+
+    ::DrawRectangleRec(dest,  backgroundColor);
+    ::GuiTextBox(dest, textValue, length + 1u, editMode);
+    dest.x -= dest.width;
+    ::GuiLabel(dest, label.c_str());
 
     UI_DRAW_OVERRIDE
 }

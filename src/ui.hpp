@@ -183,16 +183,25 @@ public:
 class ValueInput : public Control
 {
 private:
+    static const uint8_t MAX_LETTERS = 10u;
+    static const uint8_t TEXT_PADDING = 5u;
+
     float value;
-    float minValue, maxValue;
+    char* textValue = new char[MAX_LETTERS] {};
     uint8_t length;
+    float minValue, maxValue;
+    std::string label;
     bool editMode = false;
 public:
     ValueInput(std::string name, uint8_t length, raylib::Vector2 position);
-    ValueInput(std::string name, uint8_t length, raylib::Vector2 position, float minValue, float maxValue);
-    virtual ~ValueInput() = default;
+    ValueInput(std::string name, uint8_t length, raylib::Vector2 position, float minValue, float maxValue, std::string label = "");
+    virtual ~ValueInput();
+
+    uint8_t fontSize = 16u;
 
     virtual void draw() override;
+
+    inline float getValue() const { return value; }
 };
 
 

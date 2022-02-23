@@ -27,9 +27,8 @@ int nano::App::init()
     calcButton->setCallback([this]()->void{this->startAnalysis();});
     mainPanel->addChild(calcButton);
 
-    auto temp = createUIElement<ProgressBar>("testProgressBar", raylib::Vector2(100.0f, 100.0f));
-    temp->value = 0.69f;
-    mainPanel->addChild(temp);
+    ValueInput* input = createUIElement<ValueInput>("valueInput", 5u, raylib::Vector2(70.0f, 50.0f), 0.0f, 1.0f, "Test");
+    mainPanel->addChild(input);
 
     ////////////////
 
@@ -72,6 +71,12 @@ void nano::App::setDroppedImg()
         currTexture = new raylib::Texture(currImg);
         setWindowSize(currImg.GetSize());
         analyser.setTargetImg(&currImg);
+        if(maskTexture)
+        {
+            maskTexture->Unload();
+            delete maskTexture;
+            maskTexture = nullptr;
+        }
         std::cout << "Dropped file path: " << droppedFiles[0] << std::endl;
         ClearDroppedFiles();
     }
