@@ -1141,6 +1141,11 @@ int MeasureText(const char *text, int fontSize)
     return (int)vec.x;
 }
 
+Vector2 MeasureTextDefaultFont(const char* text, int fontSize)
+{
+    return MeasureTextEx(GetFontDefault(), text, fontSize, 1.0f);
+}
+
 // Measure string size for Font
 Vector2 MeasureTextEx(Font font, const char *text, float fontSize, float spacing)
 {

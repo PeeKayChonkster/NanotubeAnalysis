@@ -4,10 +4,10 @@
 #include <raylib-cpp.hpp>
 #include "nanotube.hpp"
 #include "analyser.hpp"
-#include "ui.hpp"
 #include <memory>
 #include <algorithm>
 #include <thread>
+#include <imgui.h>
 
 namespace nano
 {
@@ -21,13 +21,15 @@ private:
     raylib::Texture* currTexture = nullptr;
     raylib::Texture* maskTexture = nullptr;
     Analyser analyser;
-    Control* uiRoot;
+    ImGuiContext* context;
     raylib::Vector2 cameraPosition {};
     float cameraZoom = 1.0f;
+    const float defaultFontSize = 20.0f;
     std::thread worker;
 
     // flags
     bool workerIsDone = false;
+    bool menuVisible = false;
 
     char inputThreshold[4] {0};
     bool calculateButtonPressed = false;
@@ -35,20 +37,12 @@ private:
     raylib::Font uiFont;
 
     int init();
+    void updateUI();
     void drawUI();
     void setDroppedImg();
     void setWindowSize(raylib::Vector2 size);
     void alert(std::string message);
     void setMaskTexture();
-
-
-    template<class T, class... Args>
-    T* createUIElement(Args&&... args)
-    {
-        T* uiElement = new T(std::forward<Args>(args)...);
-        uiRoot->addChild(uiElement);
-        return uiElement;
-    }
 
     void processControls();
     void startAnalysis();

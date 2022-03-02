@@ -9,10 +9,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR}bin)
 
 set(PROJECT_SRC
     main.cpp app.cpp analyser.cpp
-    nanotube.cpp ui.cpp
+    nanotube.cpp
     )
 
-list(TRANSFORM PROJECT_SRC PREPEND "src/")
+list(TRANSFORM PROJECT_SRC PREPEND  "src/")          # transform every element in the list
+list(APPEND PROJECT_SRC 
+    external/imgui/imgui.cpp 
+    external/imgui/imgui_draw.cpp
+    external/imgui/imgui_demo.cpp
+    external/imgui/imgui_tables.cpp
+    external/imgui/imgui_widgets.cpp
+    external/imgui/imgui_demo.cpp
+    external/imgui/backends/imgui_impl_opengl3.cpp
+    )    # transform the list itself
+
 
 add_subdirectory("external/raylib")
 
@@ -22,8 +32,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC raylib)
 
+target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui")
+target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui/backends")
 target_include_directories(${PROJECT_NAME} PUBLIC "external/raylib-cpp/include")
 target_include_directories(${PROJECT_NAME} PUBLIC "external/raylib/src")
 target_include_directories(${PROJECT_NAME} PUBLIC "external/raylib/src/extras")
+
 
 
