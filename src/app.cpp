@@ -14,6 +14,7 @@ nano::App::App(int windowWidth, int windowHeight, const char* windowName):
 int nano::App::init()
 {
     SetTargetFPS(60);
+    window.SetState(FLAG_WINDOW_RESIZABLE);
 
     // GUI SETUP //
     const raylib::Color panelColor(255,255,255, 200);
@@ -128,14 +129,18 @@ int nano::App::run()
     while(!window.ShouldClose())
     {
         //--- UPDATE ---//
-        if(IsFileDropped()) setDroppedImg();
-        processControls();
-        if(workerIsDone)
+        if(IsFileDropped()) setDroppedImg();    // process dropped files
+        processControls();                      // process controls
+        if(workerIsDone)                        // free worker thread
         {
             worker.join();
             workerIsDone = false;
             uiRoot->getChild<ProgressBar>("mainProgressBar")->destroy();
             setMaskTexture();
+        }
+        if(window.IsResized())                  // resize uiRoot node
+        {
+            uiRoot->setSize({ window.GetWidth(), window.GetHeight() });
         }
         //--------------//
 
