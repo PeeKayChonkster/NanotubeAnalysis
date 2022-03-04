@@ -1,7 +1,9 @@
 #include "app.hpp"
 #include "debug.hpp"
 #include <iostream>
+#include <iomanip>
 #include <algorithm>
+#include <sstream>
 #include <rlImGui.h>
 
 #include <raygui.h>
@@ -44,7 +46,11 @@ void nano::App::drawUI()
             ImGui::SetWindowPos({ 0.0f, (float)window.GetHeight() - mainPanelHeight});
             ImGui::SetWindowSize({ (float)window.GetWidth(), mainPanelHeight});
             if(ImGui::Button("Calculate")) startAnalysis();
-            if(ImGui::Button("Open Console")) consoleVisible = !consoleVisible;
+            ImGui::SameLine();
+            if(ImGui::Button("Console")) consoleVisible = !consoleVisible;
+            ImGui::PushItemWidth(100.0f);
+            ImGui::InputFloat("Pixel size (nm)", &analyser.getPixelSize());
+            ImGui::PopItemWidth();
             ImGui::End();
         }
 
@@ -73,6 +79,11 @@ void nano::App::drawUI()
         {
             ImGui::Begin("Console", &consoleVisible, ImGuiWindowFlags_NoCollapse);
             ImGui::TextWrapped(consoleBuffer.c_str());
+            if(consoleScrollToBottom) 
+            {
+                ImGui::SetScrollHereY(1.0f);
+                consoleScrollToBottom = false;
+            }
             ImGui::End();
         }
 
@@ -222,6 +233,9 @@ void nano::App::startAnalysis()
     }
     
     calculating = true;
+    consoleVisible = true;
+
+    printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
 
     worker = std::thread([this]() {
         this->analyser.findExtremum();
@@ -244,9 +258,18 @@ void nano::App::setMaskTexture()
 void nano::App::print(std::string line)
 {
     consoleBuffer += line;
+    consoleScrollToBottom = true;
 }
 
 void nano::App::printLine(std::string line)
 {
     consoleBuffer += "\n" + line;
+    consoleScrollToBottom = true;
+}
+
+std::string nano::App::floatToString(float f, uint8_t precision)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(precision) << f;
+    return std::move(ss.str());
 }

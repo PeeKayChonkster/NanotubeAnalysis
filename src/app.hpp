@@ -34,6 +34,7 @@ private:
     bool menuVisible = false;
     bool alertWindowVisible = false;
     bool consoleVisible = false;
+    bool consoleScrollToBottom = false;
 
     char inputThreshold[4] {0};
     bool calculateButtonPressed = false;
@@ -59,6 +60,7 @@ public:
     void free();
     void print(std::string line);
     void printLine(std::string line);
+    static std::string floatToString(float f, uint8_t precision);
 };
 
 } // namespace nano

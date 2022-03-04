@@ -19,7 +19,7 @@ private:
     const uint16_t minPixelsInTube = 50u;
     const uint32_t maxAdjacentPixels = 20000u;
     const float extremumDelta = 0.02f;
-    const uint8_t extremumOverfloatMax = 1u;
+    const uint8_t extremumOverflowMax = 3u;
     float progressReport = 0.0f;
     float pixelSize_nm = -1.0f;
     float imageArea_nm2 = -1.0f;
@@ -39,7 +39,7 @@ public:
     const raylib::Image* getMask() const;
     const std::vector<Nanotube>* getTubes() const;
     float getProgress() const;
-    float getPixelSize() const;
+    float &getPixelSize();
     float getImageArea();
     void resetAll();
 };

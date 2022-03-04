@@ -60,7 +60,10 @@
 			"typeinfo": "cpp",
 			"condition_variable": "cpp",
 			"cstring": "cpp",
-			"mutex": "cpp"
+			"mutex": "cpp",
+			"map": "cpp",
+			"iomanip": "cpp",
+			"sstream": "cpp"
 		}
 	}
 }

@@ -4,7 +4,6 @@
 #include <raygui.h>
 #include <iostream>
 #include <cassert>
-#include <sstream>
 
 
 
@@ -247,11 +246,7 @@ void nano::Analyser::findExtremum()
         calculateMask(threshold);
         scanMask();
         currNumberOfTubes = nanotubes.size();
-
-        std::stringstream ss;
-        ss << "Nanotubes = " << currNumberOfTubes << std::endl;;
-        parentApp->print(ss.str());
-        std::cout << ss.str();
+        parentApp->printLine("Nanotubes = " + std::to_string(currNumberOfTubes));
 
         if(currNumberOfTubes <= prevNumberOfTubes && currNumberOfTubes > 0u)
         {
@@ -266,16 +261,10 @@ void nano::Analyser::findExtremum()
         {
             stopFlag = 0u;
         }
-        if(stopFlag >= extremumOverfloatMax)
+        if(stopFlag >= extremumOverflowMax)
         {
-            ss.clear();
-            ss << "Extremum threshold = " << extremumThreshold << std::endl;
-            parentApp->printLine(ss.str());
-            std::cout << ss.str();
-            ss.clear();
-            ss << "Extremum number of tubes = " << extremumNumberOfTubes << std::endl;
-            parentApp->printLine(ss.str());
-            std::cout << ss.str();
+            parentApp->printLine("Extremum threshold = " + App::floatToString(extremumThreshold, 3u));
+            parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
             calculateMask(extremumThreshold);
             scanMask();
             return;
@@ -308,19 +297,26 @@ float nano::Analyser::getProgress() const
     return progressReport;
 }
 
-float nano::Analyser::getPixelSize() const
+float& nano::Analyser::getPixelSize()
 {
     return pixelSize_nm;
 }
 
 float nano::Analyser::getImageArea()
 {
-    if(imageArea_nm2 > 0.0f) return imageArea_nm2;
-    else
+    if(imageArea_nm2 > 0.0f) 
+    {
+        return imageArea_nm2;
+    }
+    else if(pixelSize_nm > 0.0f)
     {
         assert(targetImg);
         imageArea_nm2 = static_cast<float>(targetImg->GetWidth()) * pixelSize_nm * static_cast<float>(targetImg->GetHeight()) * (int)pixelSize_nm;
         return imageArea_nm2;
+    }
+    else
+    {
+        return -1.0f;
     }
 }
 
