@@ -31,6 +31,7 @@ private:
     bool workerIsDone = false;
     bool calculating = false;
     bool menuVisible = false;
+    bool alertWindowVisible = false;
 
     char inputThreshold[4] {0};
     bool calculateButtonPressed = false;
