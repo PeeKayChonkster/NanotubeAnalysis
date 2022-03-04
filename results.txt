@@ -1,0 +1,26 @@
+
+Image area = 0.727 mm2
+Nanotube density = 0.000 1/mm2
+Nanotubes = 0
+Nanotubes = 0
+Nanotubes = 5
+Nanotubes = 35
+Nanotubes = 114
+Nanotubes = 188
+Nanotubes = 267
+Nanotubes = 351
+Nanotubes = 415
+Nanotubes = 466
+Nanotubes = 522
+Nanotubes = 562
+Nanotubes = 599
+Nanotubes = 632
+Nanotubes = 662
+Nanotubes = 685
+Nanotubes = 713
+Nanotubes = 717
+Nanotubes = 710
+Nanotubes = 702
+Nanotubes = 699
+Extremum threshold = 0.640
+Extremum number of tubes = 717

@@ -22,7 +22,6 @@ private:
     const uint8_t extremumOverflowMax = 3u;
     float progressReport = 0.0f;
     float pixelSize_nm = -1.0f;
-    float imageArea_nm2 = -1.0f;
     std::vector<Nanotube> nanotubes;
 
     std::vector<Point> addAdjacentPixels(int x, int y, bool* checkArray, uint32_t stackDepth);
@@ -41,6 +40,8 @@ public:
     float getProgress() const;
     float &getPixelSize();
     float getImageArea();
+    float getDensity();
+
     void resetAll();
 };
 

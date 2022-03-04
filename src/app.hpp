@@ -9,6 +9,14 @@
 #include <thread>
 #include <imgui.h>
 
+// #define WHITE { 1.0f, 1.0f, 1.0f, 1.0f }
+// #define BLACK { 0.0f, 0.0f, 0.0f, 1.0f }
+// #define RED { 1.0f, 0.0f, 0.0f, 1.0f }
+// #define GREEN { 0.0f, 1.0f, 0.0f, 1.0f }
+// #define BLUE { 0.0f, 0.0f, 1.0f, 1.0f }
+// #define YELLOW { 0.0f, 1.0f, 1.0f, 1.0f }
+// #define MAGENTA { 1.0f, 0.0f, 1.0f, 1.0f }
+
 namespace nano
 {
 
@@ -27,6 +35,7 @@ private:
     ImFont* defaultFont = nullptr;
     std::thread worker;
     std::string consoleBuffer;
+    std::string alertText;
 
     // flags
     bool workerIsDone = false;
@@ -35,6 +44,9 @@ private:
     bool alertWindowVisible = false;
     bool consoleVisible = false;
     bool consoleScrollToBottom = false;
+    bool clearConsole = false;
+    bool consoleToFile = false;
+    //
 
     char inputThreshold[4] {0};
     bool calculateButtonPressed = false;

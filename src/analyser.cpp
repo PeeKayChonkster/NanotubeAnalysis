@@ -304,20 +304,13 @@ float& nano::Analyser::getPixelSize()
 
 float nano::Analyser::getImageArea()
 {
-    if(imageArea_nm2 > 0.0f) 
-    {
-        return imageArea_nm2;
-    }
-    else if(pixelSize_nm > 0.0f)
-    {
-        assert(targetImg);
-        imageArea_nm2 = static_cast<float>(targetImg->GetWidth()) * pixelSize_nm * static_cast<float>(targetImg->GetHeight()) * (int)pixelSize_nm;
-        return imageArea_nm2;
-    }
-    else
-    {
-        return -1.0f;
-    }
+    assert(targetImg);
+    return static_cast<float>(targetImg->GetWidth()) * pixelSize_nm * static_cast<float>(targetImg->GetHeight()) * (int)pixelSize_nm;
+}
+
+float nano::Analyser::getDensity()
+{
+    return nanotubes.size() / getImageArea();
 }
 
 void nano::Analyser::resetAll()
@@ -326,6 +319,5 @@ void nano::Analyser::resetAll()
     mask.Unload();
     progressReport = 0.0f;
     pixelSize_nm = -1.0f;
-    imageArea_nm2 = -1.0f;
     nanotubes.clear();
 }

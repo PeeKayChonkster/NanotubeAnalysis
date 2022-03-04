@@ -1,10 +1,12 @@
 #include "app.hpp"
 #include "debug.hpp"
+#include "prim_exception.hpp"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
 #include <sstream>
 #include <rlImGui.h>
+#include <fstream>
 
 #include <raygui.h>
 #define RAYGUI_IMPLEMENTATION
@@ -26,6 +28,7 @@ int nano::App::init()
     defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/Kanit-Medium.ttf", defaultFontSize);
     rlImGuiReloadFonts();
 
+    // TEST
 
     return 0;
 }
@@ -45,11 +48,11 @@ void nano::App::drawUI()
             const float mainPanelHeight = 200.0f;
             ImGui::SetWindowPos({ 0.0f, (float)window.GetHeight() - mainPanelHeight});
             ImGui::SetWindowSize({ (float)window.GetWidth(), mainPanelHeight});
-            if(ImGui::Button("Calculate")) startAnalysis();
+            if(currImg.IsReady() && ImGui::Button("Calculate")) startAnalysis();
             ImGui::SameLine();
             if(ImGui::Button("Console")) consoleVisible = !consoleVisible;
             ImGui::PushItemWidth(100.0f);
-            ImGui::InputFloat("Pixel size (nm)", &analyser.getPixelSize());
+            if(currImg.IsReady()) ImGui::InputFloat("Pixel size (nm)", &analyser.getPixelSize());
             ImGui::PopItemWidth();
             ImGui::End();
         }
@@ -77,7 +80,21 @@ void nano::App::drawUI()
 
         if(consoleVisible)
         {
-            ImGui::Begin("Console", &consoleVisible, ImGuiWindowFlags_NoCollapse);
+            ImGui::Begin("Console", &consoleVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
+
+            if(ImGui::BeginMenuBar());
+            {
+                if(ImGui::BeginMenu("File"))
+                {
+                    ImGui::MenuItem("Clear", NULL, &clearConsole);
+                    ImGui::MenuItem("Save to file", NULL, &consoleToFile);
+                    ImGui::EndMenu();
+                }
+                
+                ImGui::EndMenuBar();
+            }
+         
+
             ImGui::TextWrapped(consoleBuffer.c_str());
             if(consoleScrollToBottom) 
             {
@@ -89,7 +106,26 @@ void nano::App::drawUI()
 
         if(alertWindowVisible)
         {
-            // TBI
+            ImGui::OpenPopup("Alert!");
+            ImGui::SetWindowSize({ 0.0f, 0.0f });
+            // Always center this window when appearing
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+            if (ImGui::BeginPopupModal("Alert!", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::Text(alertText.c_str());
+                ImGui::Separator();  
+
+                if (ImGui::Button("OK")) 
+                {
+                    ImGui::CloseCurrentPopup(); 
+                    alertWindowVisible = false;
+                } 
+                ImGui::SetItemDefaultFocus();
+                ImGui::EndPopup();
+            }
+
         }
 
         ImGui::PopFont();
@@ -137,7 +173,8 @@ void nano::App::setWindowSize(raylib::Vector2 size)
 
 void nano::App::alert(std::string message)
 {
-    // TO BE IMPLEMENTED
+    alertWindowVisible = true;
+    alertText = std::move(message);
 }
 
 int nano::App::run()
@@ -203,7 +240,7 @@ void nano::App::processControls()
     {
         raylib::Vector2 mouseDelta = ::GetMouseDelta();
         if(::IsMouseButtonDown(1))
-        {  
+        {
             cameraPosition += mouseDelta;
         }
     
@@ -222,6 +259,24 @@ void nano::App::processControls()
         menuVisible = !menuVisible;
     }
 
+
+    // flags processing
+    if(clearConsole) consoleBuffer.clear(); clearConsole = false;
+    if(consoleToFile)
+    {
+        std::ofstream os("./results.txt");
+        if(os.good())
+        {
+            os << consoleBuffer;
+            os.close();
+            alert("File saved!");
+            consoleToFile = false;
+        }
+        else
+        {
+            throw PRIM_EXCEPTION("Couldn't save file.");
+        }
+    }
 }
 
 void nano::App::startAnalysis()
@@ -236,6 +291,7 @@ void nano::App::startAnalysis()
     consoleVisible = true;
 
     printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
+    printLine("Nanotube density = " + floatToString(analyser.getDensity() * 1000000.0f, 3u) + " 1/mm2");
 
     worker = std::thread([this]() {
         this->analyser.findExtremum();
