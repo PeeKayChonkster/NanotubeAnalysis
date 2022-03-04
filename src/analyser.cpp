@@ -1,12 +1,16 @@
 #include "analyser.hpp"
 #include "prim_exception.hpp"
+#include "app.hpp"
 #include <raygui.h>
 #include <iostream>
+#include <cassert>
+#include <sstream>
 
 
-nano::Analyser::Analyser(): targetImg(nullptr) { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
 
-nano::Analyser::Analyser(const raylib::Image* targetImg): targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
+nano::Analyser::Analyser(App* parentApp): parentApp(parentApp), targetImg(nullptr) { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
+
+nano::Analyser::Analyser(App* parentApp, const raylib::Image* targetImg): parentApp(parentApp), targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
 {
     mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1);
     setTargetImg(targetImg);
@@ -243,7 +247,12 @@ void nano::Analyser::findExtremum()
         calculateMask(threshold);
         scanMask();
         currNumberOfTubes = nanotubes.size();
-        std::cout << "Nanotubes = " << currNumberOfTubes << std::endl;
+
+        std::stringstream ss;
+        ss << "Nanotubes = " << currNumberOfTubes << std::endl;;
+        parentApp->print(ss.str());
+        std::cout << ss.str();
+
         if(currNumberOfTubes <= prevNumberOfTubes && currNumberOfTubes > 0u)
         {
             if(stopFlag == 0u && extremumNumberOfTubes < currNumberOfTubes)
@@ -259,8 +268,14 @@ void nano::Analyser::findExtremum()
         }
         if(stopFlag >= extremumOverfloatMax)
         {
-            std::cout << "Extremum threshold = " << extremumThreshold << std::endl;
-            std::cout << "Extremum number of tubes = " << extremumNumberOfTubes << std::endl;
+            ss.clear();
+            ss << "Extremum threshold = " << extremumThreshold << std::endl;
+            parentApp->printLine(ss.str());
+            std::cout << ss.str();
+            ss.clear();
+            ss << "Extremum number of tubes = " << extremumNumberOfTubes << std::endl;
+            parentApp->printLine(ss.str());
+            std::cout << ss.str();
             calculateMask(extremumThreshold);
             scanMask();
             return;
@@ -291,4 +306,30 @@ void nano::Analyser::setProgress(float prog)
 float nano::Analyser::getProgress() const
 {
     return progressReport;
+}
+
+float nano::Analyser::getPixelSize() const
+{
+    return pixelSize_nm;
+}
+
+float nano::Analyser::getImageArea()
+{
+    if(imageArea_nm2 > 0.0f) return imageArea_nm2;
+    else
+    {
+        assert(targetImg);
+        imageArea_nm2 = static_cast<float>(targetImg->GetWidth()) * pixelSize_nm * static_cast<float>(targetImg->GetHeight()) * (int)pixelSize_nm;
+        return imageArea_nm2;
+    }
+}
+
+void nano::Analyser::resetAll()
+{
+    targetImg = nullptr;
+    mask.Unload();
+    progressReport = 0.0f;
+    pixelSize_nm = -1.0f;
+    imageArea_nm2 = -1.0f;
+    nanotubes.clear();
 }

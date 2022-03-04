@@ -11,7 +11,8 @@ namespace nano
 class Analyser
 {
 private:
-    const raylib::Image* targetImg;
+    class App* parentApp = nullptr;
+    const raylib::Image* targetImg = nullptr;
     raylib::Image mask;
     const raylib::Color maskColorPos = { 0, 230, 0, 180 };
     const raylib::Color maskColorNeg = { 0, 0, 0, 0 };
@@ -20,13 +21,15 @@ private:
     const float extremumDelta = 0.02f;
     const uint8_t extremumOverfloatMax = 1u;
     float progressReport = 0.0f;
+    float pixelSize_nm = -1.0f;
+    float imageArea_nm2 = -1.0f;
     std::vector<Nanotube> nanotubes;
 
     std::vector<Point> addAdjacentPixels(int x, int y, bool* checkArray, uint32_t stackDepth);
     void setProgress(float prog);
 public:
-    Analyser();
-    Analyser(const raylib::Image* targetImg);
+    Analyser(App* parentApp);
+    Analyser(class App* parentApp, const raylib::Image* targetImg);
     Analyser(const Analyser& other) = delete;
 
     void setTargetImg(const raylib::Image* targetImg);
@@ -36,6 +39,9 @@ public:
     const raylib::Image* getMask() const;
     const std::vector<Nanotube>* getTubes() const;
     float getProgress() const;
+    float getPixelSize() const;
+    float getImageArea();
+    void resetAll();
 };
 
 }  // namespace nano

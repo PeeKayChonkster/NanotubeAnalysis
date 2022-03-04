@@ -26,12 +26,14 @@ private:
     const float defaultFontSize = 20.0f;
     ImFont* defaultFont = nullptr;
     std::thread worker;
+    std::string consoleBuffer;
 
     // flags
     bool workerIsDone = false;
     bool calculating = false;
     bool menuVisible = false;
     bool alertWindowVisible = false;
+    bool consoleVisible = false;
 
     char inputThreshold[4] {0};
     bool calculateButtonPressed = false;
@@ -45,6 +47,7 @@ private:
     void alert(std::string message);
     void setMaskTexture();
 
+
     void processControls();
     void startAnalysis();
 
@@ -54,6 +57,8 @@ public:
 
     int run();
     void free();
+    void print(std::string line);
+    void printLine(std::string line);
 };
 
 } // namespace nano

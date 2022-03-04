@@ -8,7 +8,8 @@
 #define RAYGUI_IMPLEMENTATION
 
 nano::App::App(int windowWidth, int windowHeight, const char* windowName): 
-    window(windowWidth, windowHeight, windowName)
+    window(windowWidth, windowHeight, windowName),
+    analyser(this)
     {}
 
 int nano::App::init()
@@ -43,6 +44,7 @@ void nano::App::drawUI()
             ImGui::SetWindowPos({ 0.0f, (float)window.GetHeight() - mainPanelHeight});
             ImGui::SetWindowSize({ (float)window.GetWidth(), mainPanelHeight});
             if(ImGui::Button("Calculate")) startAnalysis();
+            if(ImGui::Button("Open Console")) consoleVisible = !consoleVisible;
             ImGui::End();
         }
 
@@ -64,6 +66,13 @@ void nano::App::drawUI()
             ImGui::Begin("Calculating...", NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
             ImGui::ProgressBar(analyser.getProgress());
             //ImGui::PopStyleColor(2);
+            ImGui::End();
+        }
+
+        if(consoleVisible)
+        {
+            ImGui::Begin("Console", &consoleVisible, ImGuiWindowFlags_NoCollapse);
+            ImGui::TextWrapped(consoleBuffer.c_str());
             ImGui::End();
         }
 
@@ -89,6 +98,7 @@ void nano::App::setDroppedImg()
         if(currTexture) delete currTexture;
         currTexture = new raylib::Texture(currImg);
         setWindowSize(currImg.GetSize());
+        analyser.resetAll();
         analyser.setTargetImg(&currImg);
         if(maskTexture)
         {
@@ -174,21 +184,27 @@ void nano::App::free()
 void nano::App::processControls()
 {
     raylib::Vector2 mousePos = ::GetMousePosition();
+    ImGuiIO& io = ImGui::GetIO();
     //prim::Debug::printLine(std::to_string(mousePos.x) + "|" + std::to_string(mousePos.y));
 
-    raylib::Vector2 mouseDelta = ::GetMouseDelta();
-    if(::IsMouseButtonDown(1))
-    {  
-        cameraPosition += mouseDelta;
-    }
-    
-    float wheelDelta = ::GetMouseWheelMove();
-    if(wheelDelta)
+    // if mouse NOT hovering above any gui elements
+    if(!io.WantCaptureMouse)
     {
-        float zoomMultiplier = ::IsKeyDown(KEY_LEFT_SHIFT)? 0.4f : 0.02f;
-        cameraZoom += wheelDelta * zoomMultiplier;
-        cameraZoom = std::max(0.01f, cameraZoom);
+        raylib::Vector2 mouseDelta = ::GetMouseDelta();
+        if(::IsMouseButtonDown(1))
+        {  
+            cameraPosition += mouseDelta;
+        }
+    
+        float wheelDelta = ::GetMouseWheelMove();
+        if(wheelDelta)
+        {
+            float zoomMultiplier = ::IsKeyDown(KEY_LEFT_SHIFT)? 0.4f : 0.02f;
+            cameraZoom += wheelDelta * zoomMultiplier;
+            cameraZoom = std::max(0.01f, cameraZoom);
+        }
     }
+   
 
     if(::IsKeyPressed(KEY_TAB))
     {
@@ -223,4 +239,14 @@ void nano::App::setMaskTexture()
     {
         maskTexture = new raylib::Texture(*analyser.getMask());
     }
+}
+
+void nano::App::print(std::string line)
+{
+    consoleBuffer += line;
+}
+
+void nano::App::printLine(std::string line)
+{
+    consoleBuffer += "\n" + line;
 }
