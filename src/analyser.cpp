@@ -226,10 +226,9 @@ std::vector<nano::Point> nano::Analyser::addAdjacentPixels(int x, int y, bool* c
     return std::move(points);
 }
 
-void nano::Analyser::findExtremum(float* progressReport)
+void nano::Analyser::findExtremum()
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to find nanotube extremum without target image.");
-    this->progressReport = progressReport;
     float threshold = 1.0f;
     float extremumThreshold = 1.0f;
     uint32_t extremumNumberOfTubes = 0u;
@@ -286,20 +285,10 @@ const std::vector<nano::Nanotube>* nano::Analyser::getTubes() const
 
 void nano::Analyser::setProgress(float prog)
 {
-    if(progressReport)
-    {
-        *progressReport = prog;
-    }
+    progressReport = prog;
 }
 
 float nano::Analyser::getProgress() const
 {
-    if(progressReport)
-    {
-        return *progressReport;
-    }
-    else
-    {
-        return 0.0f;
-    }
+    return progressReport;
 }

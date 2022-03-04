@@ -19,7 +19,7 @@ private:
     const uint32_t maxAdjacentPixels = 20000u;
     const float extremumDelta = 0.02f;
     const uint8_t extremumOverfloatMax = 1u;
-    float* progressReport = nullptr;
+    float progressReport = 0.0f;
     std::vector<Nanotube> nanotubes;
 
     std::vector<Point> addAdjacentPixels(int x, int y, bool* checkArray, uint32_t stackDepth);
@@ -32,7 +32,7 @@ public:
     void setTargetImg(const raylib::Image* targetImg);
     void calculateMask(float threshold);
     void scanMask();
-    void findExtremum(float* progressReport);
+    void findExtremum();
     const raylib::Image* getMask() const;
     const std::vector<Nanotube>* getTubes() const;
     float getProgress() const;

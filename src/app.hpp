@@ -21,14 +21,15 @@ private:
     raylib::Texture* currTexture = nullptr;
     raylib::Texture* maskTexture = nullptr;
     Analyser analyser;
-    ImGuiContext* context;
     raylib::Vector2 cameraPosition {};
     float cameraZoom = 1.0f;
     const float defaultFontSize = 20.0f;
+    ImFont* defaultFont = nullptr;
     std::thread worker;
 
     // flags
     bool workerIsDone = false;
+    bool calculating = false;
     bool menuVisible = false;
 
     char inputThreshold[4] {0};
@@ -37,7 +38,6 @@ private:
     raylib::Font uiFont;
 
     int init();
-    void updateUI();
     void drawUI();
     void setDroppedImg();
     void setWindowSize(raylib::Vector2 size);

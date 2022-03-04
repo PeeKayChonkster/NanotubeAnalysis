@@ -20,7 +20,7 @@ list(APPEND PROJECT_SRC
     external/imgui/imgui_tables.cpp
     external/imgui/imgui_widgets.cpp
     external/imgui/imgui_demo.cpp
-    external/imgui/backends/imgui_impl_opengl3.cpp
+    external/imgui/rlImGui.cpp
     )    # transform the list itself
 
 
