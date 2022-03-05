@@ -318,6 +318,6 @@ void nano::Analyser::resetAll()
     targetImg = nullptr;
     mask.Unload();
     progressReport = 0.0f;
-    pixelSize_nm = -1.0f;
+    pixelSize_nm = 0.0f;
     nanotubes.clear();
 }

@@ -264,18 +264,26 @@ void nano::App::processControls()
     if(clearConsole) consoleBuffer.clear(); clearConsole = false;
     if(consoleToFile)
     {
-        std::ofstream os("./results.txt");
-        if(os.good())
+        if(consoleBuffer.empty())
         {
-            os << consoleBuffer;
-            os.close();
-            alert("File saved!");
-            consoleToFile = false;
+            alert("The console is empty.");
         }
         else
         {
-            throw PRIM_EXCEPTION("Couldn't save file.");
+            std::ofstream os("./results.txt");
+            if(os.good())
+            {
+                os << consoleBuffer;
+                os.close();
+                alert("File results.txt saved!");
+                
+            }
+            else
+            {
+                throw PRIM_EXCEPTION("Couldn't save file.");
+            }
         }
+       consoleToFile = false;
     }
 }
 
@@ -290,6 +298,7 @@ void nano::App::startAnalysis()
     calculating = true;
     consoleVisible = true;
 
+    printLine("<<<<<Starting analysis>>>>>");
     printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
     printLine("Nanotube density = " + floatToString(analyser.getDensity() * 1000000.0f, 3u) + " 1/mm2");
 
