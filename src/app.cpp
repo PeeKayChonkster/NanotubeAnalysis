@@ -45,6 +45,11 @@ void nano::App::drawUI()
         if(menuVisible)
         {
             ImGui::Begin("Menu", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+            if(currImg.IsReady())
+            {
+                ImGui::Text(currImgPath.c_str());
+                ImGui::Separator();
+            }
             const float mainPanelHeight = 200.0f;
             ImGui::SetWindowPos({ 0.0f, (float)window.GetHeight() - mainPanelHeight});
             ImGui::SetWindowSize({ (float)window.GetWidth(), mainPanelHeight});
