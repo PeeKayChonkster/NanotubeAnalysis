@@ -46,6 +46,7 @@ private:
     bool consoleScrollToBottom = false;
     bool clearConsole = false;
     bool consoleToFile = false;
+    bool maskVisible = true;
     //
 
     char inputThreshold[4] {0};

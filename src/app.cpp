@@ -59,6 +59,7 @@ void nano::App::drawUI()
             ImGui::PushItemWidth(100.0f);
             if(currImg.IsReady()) ImGui::InputFloat("Pixel size (nm)", &analyser.getPixelSize());
             ImGui::PopItemWidth();
+            if(maskTexture && ImGui::Button("Mask")) maskVisible = !maskVisible;
             ImGui::End();
         }
 
@@ -211,7 +212,7 @@ int nano::App::run()
             window.ClearBackground();
 
             if(currTexture) currTexture->Draw(cameraPosition, 0.0f, cameraZoom);
-            if(maskTexture) maskTexture->Draw(cameraPosition, 0.0f, cameraZoom);
+            if(maskTexture && maskVisible) maskTexture->Draw(cameraPosition, 0.0f, cameraZoom);
 
             prim::Debug::draw(RED);
             
