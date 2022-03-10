@@ -101,7 +101,7 @@ void nano::App::drawUI()
             }
          
 
-            ImGui::TextWrapped(consoleBuffer.c_str());
+            ImGui::TextUnformatted(consoleBuffer.begin());
             if(consoleScrollToBottom) 
             {
                 ImGui::SetScrollHereY(1.0f);
@@ -279,7 +279,7 @@ void nano::App::processControls()
             std::ofstream os("./results.txt");
             if(os.good())
             {
-                os << consoleBuffer;
+                os << consoleBuffer.c_str();
                 os.close();
                 alert("File results.txt saved!");
                 
@@ -305,13 +305,18 @@ void nano::App::startAnalysis()
     consoleVisible = true;
 
     printLine("<<<<<Starting analysis>>>>>");
-    printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
-    printLine("Nanotube density = " + floatToString(analyser.getDensity() * 1000000.0f, 3u) + " 1/mm2");
+    if(analyser.getPixelSize() > 0.0f)
+    {
+        printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
+        printLine("Nanotube density = " + floatToString(analyser.getDensity() * 1000000.0f, 3u) + " 1/mm2");
+    }
 
-    worker = std::thread([this]() {
-        this->analyser.findExtremum();
-        this->workerIsDone = true;
-    });
+    auto workerLambda = [this]() {
+            this->analyser.findExtremum();
+            this->workerIsDone = true;
+        };
+
+    worker = std::thread(workerLambda);
 }
 
 void nano::App::setMaskTexture()
@@ -328,13 +333,13 @@ void nano::App::setMaskTexture()
 
 void nano::App::print(std::string line)
 {
-    consoleBuffer += line;
+    consoleBuffer.append(line.c_str());
     consoleScrollToBottom = true;
 }
 
 void nano::App::printLine(std::string line)
 {
-    consoleBuffer += "\n" + line;
+    consoleBuffer.append(("\n" + line).c_str());
     consoleScrollToBottom = true;
 }
 

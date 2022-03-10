@@ -30,7 +30,7 @@ add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES DEBUG_POSTFIX -d)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC raylib)
+target_link_libraries(${PROJECT_NAME} PUBLIC raylib PRIVATE -static-libgcc -static-libstdc++)
 
 target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui")
 target_include_directories(${PROJECT_NAME} PUBLIC "external/imgui/backends")

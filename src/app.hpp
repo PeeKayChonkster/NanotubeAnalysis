@@ -34,7 +34,7 @@ private:
     const float defaultFontSize = 20.0f;
     ImFont* defaultFont = nullptr;
     std::thread worker;
-    std::string consoleBuffer;
+    ImGuiTextBuffer consoleBuffer;
     std::string alertText;
 
     // flags

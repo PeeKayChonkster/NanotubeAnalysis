@@ -11,6 +11,7 @@ struct Point
     uint16_t x;
     uint16_t y;
 
+    Point() = default;
     Point(uint16_t x, uint16_t y): x(x), y(y) {};
 
     Point operator+(const Point& rhs) { return Point(x + rhs.x, y + rhs.y); }

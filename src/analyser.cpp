@@ -2,6 +2,7 @@
 #include "prim_exception.hpp"
 #include "app.hpp"
 #include <raygui.h>
+#include <stack>
 #include <iostream>
 #include <cassert>
 
@@ -44,7 +45,7 @@ void nano::Analyser::calculateMask(float threshold)
     }
 }
 
-void nano::Analyser::scanMask()
+void nano::Analyser::scanMaskForTubes()
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to scan mask without target image.");
     setProgress(0.0f);
@@ -60,14 +61,10 @@ void nano::Analyser::scanMask()
             setProgress(idx / (float)numberOfPixels);
             if(!checkArray[idx])
             {
-                checkArray[idx] = true;
-                if(::GetImageColor(mask, x, y).a)
+                std::vector<Point> points = checkPixel(x, y, checkArray);
+                if(points.size() >= minPixelsInTube)
                 {
-                    std::vector<Point> adjacentPixels = addAdjacentPixels(x, y, checkArray, 0u);
-                    if(adjacentPixels.size() > minPixelsInTube)
-                    {
-                        nanotubes.emplace_back();
-                    }
+                    nanotubes.push_back(std::move(points));
                 }
             }
         }
@@ -76,157 +73,65 @@ void nano::Analyser::scanMask()
     delete[] checkArray;
 }
 
-std::vector<nano::Point> nano::Analyser::addAdjacentPixels(int x, int y, bool* checkArray, uint32_t stackDepth)
+std::vector<nano::Point> nano::Analyser::checkPixel(int x, int y, bool* checkArray)
 {
-    if(stackDepth > maxAdjacentPixels) throw PRIM_EXCEPTION("Stack depth got too big trying to find adjacent pixels. Try to adjust threshold.");
+    std::stack<Point> pointsStack;
+    std::vector<Point> resultPoints;
 
-    std::vector<Point> points;
+    Point start(x, y);
+    pointsStack.push(start);
     
-    int currX = x + 1;
-    int currY = y;
-    int idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
+    while(!pointsStack.empty())
     {
-        checkArray[idx] = true;
+        Point currPoint = pointsStack.top(); pointsStack.pop();
+        int idx = currPoint.x + currPoint.y * mask.width;
 
-        if(::GetImageColor(mask, currX, currY).a)
+        if(currPoint.x < mask.width && currPoint.x >= 0 && currPoint.y < mask.height && currPoint.y >= 0 && !checkArray[idx] && ::GetImageColor(mask, currPoint.x, currPoint.y).a )
         {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
+            checkArray[idx] = true;
+            resultPoints.push_back(currPoint);
+
+            Point adjPoint;
+
+            adjPoint = currPoint;
+            adjPoint.x += 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.x += 1u;
+            adjPoint.y += 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.y += 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.x -= 1u;
+            adjPoint.y += 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.x -= 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.x -= 1u;
+            adjPoint.y -= 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.y -= 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.x += 1u;
+            adjPoint.y +- 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
         }
     }
 
-    currX = x + 1;
-    currY = y + 1;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    currX = x;
-    currY = y + 1;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-        
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    currX = x - 1;
-    currY = y + 1;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    currX = x - 1;
-    currY = y;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    currX = x - 1;
-    currY = y - 1;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    currX = x;
-    currY = y - 1;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    currX = x + 1;
-    currY = y - 1;
-    idx = currX + currY * mask.width;
-    if(currX < mask.width && currX >= 0 && currY < mask.height && currY >= 0 && !checkArray[idx])
-    {
-        checkArray[idx] = true;
-
-        if(::GetImageColor(mask, currX, currY).a)
-        {
-            points.emplace_back(currX, currY);
-            std::vector<Point> morePoints = addAdjacentPixels(currX, currY, checkArray, ++stackDepth);
-            if(!morePoints.empty())
-            {
-                points.insert(points.end(), std::make_move_iterator(morePoints.begin()), std::make_move_iterator(morePoints.end()));
-            }
-        }
-    }
-
-    return std::move(points);
+    return std::move(resultPoints);
 }
 
 void nano::Analyser::findExtremum()
@@ -236,21 +141,22 @@ void nano::Analyser::findExtremum()
     float extremumThreshold = 1.0f;
     uint32_t extremumNumberOfTubes = 0u;
     calculateMask(threshold);
-    scanMask();
+    scanMaskForTubes();
     uint8_t stopFlag = 0u;
     uint32_t currNumberOfTubes = nanotubes.size();
     uint32_t prevNumberOfTubes = currNumberOfTubes;
+    parentApp->printLine("Threshold = " + App::floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
     while(true)
     {
         threshold -= extremumDelta;
         calculateMask(threshold);
-        scanMask();
+        scanMaskForTubes();
         currNumberOfTubes = nanotubes.size();
-        parentApp->printLine("Nanotubes = " + std::to_string(currNumberOfTubes));
+        parentApp->printLine("Threshold = " + App::floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
 
-        if(currNumberOfTubes <= prevNumberOfTubes && currNumberOfTubes > 0u)
+        if(currNumberOfTubes <= prevNumberOfTubes && currNumberOfTubes > 0u)    // derivative is negative
         {
-            if(stopFlag == 0u && extremumNumberOfTubes < currNumberOfTubes)
+            if(stopFlag == 0u && extremumNumberOfTubes < currNumberOfTubes)     // found local extremum
             {
                 extremumThreshold = threshold + extremumDelta;
                 extremumNumberOfTubes = prevNumberOfTubes;
@@ -261,15 +167,15 @@ void nano::Analyser::findExtremum()
         {
             stopFlag = 0u;
         }
-        if(stopFlag >= extremumOverflowMax)
+        if(stopFlag >= extremumOverflowMax || threshold < 0.0f)                 // end analysis
         {
             parentApp->printLine("Extremum threshold = " + App::floatToString(extremumThreshold, 3u));
-            parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
+            parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes) + "\n");
             calculateMask(extremumThreshold);
-            scanMask();
+            scanMaskForTubes();
             return;
         }
-        else
+        else                                                                    // resume analysis
         {
             prevNumberOfTubes = currNumberOfTubes;
         }
