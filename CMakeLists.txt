@@ -9,7 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR}bin)
 
 set(PROJECT_SRC
     main.cpp app.cpp analyser.cpp
-    nanotube.cpp
+    nanotube.cpp rlImGui.cpp
     )
 
 list(TRANSFORM PROJECT_SRC PREPEND  "src/")          # transform every element in the list
@@ -20,7 +20,6 @@ list(APPEND PROJECT_SRC
     external/imgui/imgui_tables.cpp
     external/imgui/imgui_widgets.cpp
     external/imgui/imgui_demo.cpp
-    external/imgui/rlImGui.cpp
     )    # transform the list itself
 
 
