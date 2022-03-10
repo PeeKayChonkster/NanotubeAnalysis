@@ -1,6 +1,7 @@
 #include "app.hpp"
 #include "debug.hpp"
 #include "prim_exception.hpp"
+#include "imgui_wrappers.hpp"
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
@@ -10,6 +11,7 @@
 
 #include <raygui.h>
 #define RAYGUI_IMPLEMENTATION
+
 
 nano::App::App(int windowWidth, int windowHeight, const char* windowName): 
     window(windowWidth, windowHeight, windowName),
@@ -54,12 +56,14 @@ void nano::App::drawUI()
             const float mainPanelHeight = 200.0f;
             ImGui::SetWindowPos({ 0.0f, (float)window.GetHeight() - mainPanelHeight});
             ImGui::SetWindowSize({ (float)window.GetWidth(), mainPanelHeight});
-            if(currImg.IsReady() && ImGui::Button("Calculate")) startAnalysis();
+            if(currImg.IsReady() && ImGui::Button("Start extremum analysis")) 
+            {
+                extremumAnalysisConfigVisible = !extremumAnalysisConfigVisible;
+                menuVisible = false;
+            }
             ImGui::SameLine();
             if(ImGui::Button("Console")) consoleVisible = !consoleVisible;
-            ImGui::PushItemWidth(100.0f);
-            if(currImg.IsReady()) ImGui::InputFloat("Pixel size (nm)", &analyser.getPixelSize());
-            ImGui::PopItemWidth();
+            ImGui::SetTooltipD("show/hide console", 1.0f);
             if(maskTexture && ImGui::Button("Mask")) maskVisible = !maskVisible;
             ImGui::End();
         }
@@ -70,6 +74,37 @@ void nano::App::drawUI()
             static const uint8_t fontSize = 28u;
             static const Vector2 fontSizeVec = ::MeasureTextDefaultFont(text, fontSize);
             DrawText(text, (window.GetWidth() - fontSizeVec.x) * 0.5f, (window.GetHeight() - fontSizeVec.y) * 0.5, fontSize, WHITE);
+        }
+
+        if(extremumAnalysisConfigVisible)
+        {
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+            ImGui::Begin("Extremum analysis config", &extremumAnalysisConfigVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+            {
+                ImGui::PushItemWidth(100.0f);
+                if(currImg.IsReady())
+                {
+                    ImGui::InputFloatClamped("Pixel size (nm)", &analyser.pixelSize_nm, 0.0f);
+                    ImGui::InputFloatClamped("Delta step", &analyser.extremumDeltaStep, 0.0f);
+                    if(analyser.processFullRange) ImGui::BeginDisabled();
+                    ImGui::InputIntClamped("Overflow tolerance", &analyser.extremumOverflowTolerance, 0);
+                    if(analyser.processFullRange) ImGui::EndDisabled();
+                    ImGui::Checkbox("Process full range", &analyser.processFullRange);
+                    ImGui::InputIntClamped("Min pixels in nanotube", &analyser.minPixelsInTube, 0);
+                }
+                else
+                {
+                    ImGui::Text("No image to analyse!");
+                }
+                ImGui::PopItemWidth();
+                if(ImGui::Button("Start"))
+                {
+                    extremumAnalysisConfigVisible = false;
+                    startAnalysis();
+                }
+            }
+            ImGui::End();
         }
 
         if(calculating)
@@ -306,7 +341,7 @@ void nano::App::startAnalysis()
     consoleVisible = true;
 
     printLine("<<<<<Starting analysis>>>>>");
-    if(analyser.getPixelSize() > 0.0f)
+    if(analyser.pixelSize_nm > 0.0f)
     {
         printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
         printLine("Nanotube density = " + floatToString(analyser.getDensity() * 1000000.0f, 3u) + " 1/mm2");

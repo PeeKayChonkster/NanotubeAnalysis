@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <thread>
 #include <imgui.h>
+#include <cassert>
 
 // #define WHITE { 1.0f, 1.0f, 1.0f, 1.0f }
 // #define BLACK { 0.0f, 0.0f, 0.0f, 1.0f }
@@ -19,6 +20,8 @@
 
 namespace nano
 {
+
+enum ConfigValue { PixelSize, DeltaStep, OverflowTolerance };
 
 class App
 {
@@ -36,6 +39,7 @@ private:
     std::thread worker;
     ImGuiTextBuffer consoleBuffer;
     std::string alertText;
+    const float tooltipDelay = 1.0f;
 
     // flags
     bool workerIsDone = false;
@@ -47,6 +51,7 @@ private:
     bool clearConsole = false;
     bool consoleToFile = false;
     bool maskVisible = true;
+    bool extremumAnalysisConfigVisible = false;
     //
 
     char inputThreshold[4] {0};
@@ -60,7 +65,6 @@ private:
     void setWindowSize(raylib::Vector2 size);
     void alert(std::string message);
     void setMaskTexture();
-
 
     void processControls();
     void startAnalysis();

@@ -148,7 +148,7 @@ void nano::Analyser::findExtremum()
     parentApp->printLine("Threshold = " + App::floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
     while(true)
     {
-        threshold -= extremumDelta;
+        threshold -= extremumDeltaStep;
         calculateMask(threshold);
         scanMaskForTubes();
         currNumberOfTubes = nanotubes.size();
@@ -158,7 +158,7 @@ void nano::Analyser::findExtremum()
         {
             if(stopFlag == 0u && extremumNumberOfTubes < currNumberOfTubes)     // found local extremum
             {
-                extremumThreshold = threshold + extremumDelta;
+                extremumThreshold = threshold + extremumDeltaStep;
                 extremumNumberOfTubes = prevNumberOfTubes;
             }
             ++stopFlag;
@@ -167,7 +167,7 @@ void nano::Analyser::findExtremum()
         {
             stopFlag = 0u;
         }
-        if(stopFlag >= extremumOverflowMax || threshold < 0.0f)                 // end analysis
+        if((stopFlag >= extremumOverflowTolerance && !processFullRange) || threshold < 0.0f)                 // end analysis
         {
             parentApp->printLine("Extremum threshold = " + App::floatToString(extremumThreshold, 3u));
             parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes) + "\n");
@@ -201,11 +201,6 @@ void nano::Analyser::setProgress(float prog)
 float nano::Analyser::getProgress() const
 {
     return progressReport;
-}
-
-float& nano::Analyser::getPixelSize()
-{
-    return pixelSize_nm;
 }
 
 float nano::Analyser::getImageArea()
