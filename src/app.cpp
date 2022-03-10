@@ -25,6 +25,7 @@ int nano::App::init()
     // GUI SETUP //
     rlImGuiSetup(true);
     ImGuiIO& io = ImGui::GetIO();
+    io.ConfigWindowsMoveFromTitleBarOnly = true;
     defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/Kanit-Medium.ttf", defaultFontSize);
     rlImGuiReloadFonts();
 
