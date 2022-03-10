@@ -167,12 +167,16 @@ void nano::Analyser::findExtremum()
         {
             stopFlag = 0u;
         }
-        if((stopFlag >= extremumOverflowTolerance && !processFullRange) || threshold < 0.0f)                 // end analysis
+        if((stopFlag >= extremumOverflowTolerance && !processFullRange) || threshold - extremumDeltaStep < 0.0f)                 // end analysis
         {
-            parentApp->printLine("Extremum threshold = " + App::floatToString(extremumThreshold, 3u));
-            parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes) + "\n");
             calculateMask(extremumThreshold);
             scanMaskForTubes();
+
+            parentApp->printLine("<<<<< Results >>>>>");
+            parentApp->printLine("Extremum threshold = " + App::floatToString(extremumThreshold, 3u));
+            parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
+            parentApp->printLine("Image area = " + App::floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
+            parentApp->printLine("Nanotube density = " + App::floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
             return;
         }
         else                                                                    // resume analysis
@@ -221,4 +225,9 @@ void nano::Analyser::resetAll()
     progressReport = 0.0f;
     pixelSize_nm = 0.0f;
     nanotubes.clear();
+}
+
+bool nano::Analyser::areTubesCalculated() const
+{
+    return !nanotubes.empty();
 }

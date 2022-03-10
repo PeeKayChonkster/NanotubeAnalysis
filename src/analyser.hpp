@@ -43,6 +43,7 @@ public:
     float getProgress() const;
     float getImageArea();
     float getDensity();
+    bool areTubesCalculated() const;
 
     void resetAll();
 };

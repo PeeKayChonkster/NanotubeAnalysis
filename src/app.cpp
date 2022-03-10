@@ -340,13 +340,8 @@ void nano::App::startAnalysis()
     calculating = true;
     consoleVisible = true;
 
-    printLine("<<<<<Starting analysis>>>>>");
-    if(analyser.pixelSize_nm > 0.0f)
-    {
-        printLine("Image area = " + floatToString(analyser.getImageArea() * 0.000001, 3u) + " mm2");
-        printLine("Nanotube density = " + floatToString(analyser.getDensity() * 1000000.0f, 3u) + " 1/mm2");
-    }
-
+    printLine("<<<<< Starting analysis >>>>>");
+   
     auto workerLambda = [this]() {
             this->analyser.findExtremum();
             this->workerIsDone = true;
