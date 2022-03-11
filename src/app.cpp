@@ -8,6 +8,7 @@
 #include <sstream>
 #include "rlImGui.h"
 #include <fstream>
+#include <filesystem>
 
 #include <raygui.h>
 #define RAYGUI_IMPLEMENTATION
@@ -181,8 +182,9 @@ void nano::App::setDroppedImg()
     char** droppedFiles = GetDroppedFiles(&numberOfFiles);
     if(numberOfFiles > 0)
     {
-        currImg.Load(droppedFiles[0]);
-        currImgPath = std::move(droppedFiles[0]);
+        std::string path = std::filesystem::u8path(droppedFiles[0]);
+        currImg.Load(path);
+        currImgPath = path;
         currImg.Format(PIXELFORMAT_UNCOMPRESSED_GRAYSCALE);
         if(currTexture) delete currTexture;
         currTexture = new raylib::Texture(currImg);
@@ -195,7 +197,7 @@ void nano::App::setDroppedImg()
             delete maskTexture;
             maskTexture = nullptr;
         }
-        std::cout << "Dropped file path: " << droppedFiles[0] << std::endl;
+        std::cout << "Dropped file path: " << path << std::endl;
         cameraPosition = raylib::Vector2::Zero();
         cameraZoom = 1.0f;
         ClearDroppedFiles();
