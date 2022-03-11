@@ -123,7 +123,7 @@ void nano::App::drawUI()
 
         if(consoleVisible)
         {
-            ImGui::Begin("Console", &consoleVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
+            ImGui::Begin("Console", &consoleVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
 
             if(ImGui::BeginMenuBar());
             {
@@ -343,6 +343,7 @@ void nano::App::startAnalysis()
     consoleVisible = true;
 
     printLine("<<<<< Starting analysis >>>>>");
+    printLine("Image: " + currImgPath);
    
     auto workerLambda = [this]() {
             this->analyser.findExtremum();
