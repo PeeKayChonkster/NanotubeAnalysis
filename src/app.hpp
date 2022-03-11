@@ -34,7 +34,7 @@ private:
     Analyser analyser;
     raylib::Vector2 cameraPosition {};
     float cameraZoom = 1.0f;
-    const float defaultFontSize = 20.0f;
+    const float defaultFontSize = 18.0f;
     ImFont* defaultFont = nullptr;
     std::thread worker;
     ImGuiTextBuffer consoleBuffer;

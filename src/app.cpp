@@ -28,7 +28,7 @@ int nano::App::init()
     rlImGuiSetup(true);
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigWindowsMoveFromTitleBarOnly = true;
-    defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/Kanit-Medium.ttf", defaultFontSize);
+    defaultFont = io.Fonts->AddFontFromFileTTF("./res/fonts/Roboto-Regular.ttf", defaultFontSize, NULL, io.Fonts->GetGlyphRangesCyrillic());
     rlImGuiReloadFonts();
 
     // TEST
