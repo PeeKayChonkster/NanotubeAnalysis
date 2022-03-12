@@ -23,6 +23,7 @@ private:
     static inline std::string currImgPath;
     static inline raylib::Texture* currTexture = nullptr;
     static inline raylib::Texture* maskTexture = nullptr;
+    static inline raylib::Texture* tubeMaskTexture = nullptr;
     static inline Analyser analyser;
     static inline raylib::Vector2 cameraPosition;
     static inline float cameraZoom = 1.0f;
@@ -33,6 +34,7 @@ private:
     static inline bool workerIsDone = false;
     static inline bool calculating = false;
     static inline bool maskVisible = true;
+    static inline bool tubeMaskVisible = true;
     //
 
     static int init(int windowWidth, int windowHeight, const char* windowName);
@@ -40,6 +42,7 @@ private:
     static void setWindowSize(raylib::Vector2 size);
 
     static void setMaskTexture();
+    static void setTubeMaskTexture();
 
     static void processControls();
     static void startExtremumAnalysis();

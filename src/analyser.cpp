@@ -8,11 +8,13 @@
 
 
 
-nano::Analyser::Analyser() { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
+nano::Analyser::Analyser() { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); tubeMask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
 
-nano::Analyser::Analyser(const raylib::Image* targetImg): targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
+nano::Analyser::Analyser(const raylib::Image* targetImg): 
+        targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), tubeMask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
 {
     mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1);
+    tubeMask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1);
     setTargetImg(targetImg);
 }
 
@@ -50,6 +52,8 @@ void nano::Analyser::scanMaskForTubes()
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to scan mask without target image.");
     if(!mask.IsReady()) throw PRIM_EXCEPTION("Trying to scan mask for tubes before creating mask.");
+    if(!tubeMask.IsReady()) tubeMask = raylib::Image(targetImg->width, targetImg->height, maskColorNeg);
+    tubeMask.ClearBackground(maskColorNeg);
     setProgress(0.0f);
     nanotubes.clear();
     uint32_t numberOfPixels = targetImg->width * targetImg->height;
@@ -66,6 +70,7 @@ void nano::Analyser::scanMaskForTubes()
                 std::vector<Point> points = checkPixel(x, y, checkArray);
                 if(points.size() >= minPixelsInTube)
                 {
+                    for(const auto& point : points) { tubeMask.DrawPixel(point.x, point.y, tubeMaskColorPos); }
                     nanotubes.push_back(std::move(points));
                 }
             }
@@ -101,20 +106,11 @@ std::vector<nano::Point> nano::Analyser::checkPixel(int x, int y, bool* checkArr
 
             adjPoint = currPoint;
             adjPoint.x += 1u;
-            adjPoint.y += 1u;
+            adjPoint.y -= 1u;
             if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
 
             adjPoint = currPoint;
-            adjPoint.y += 1u;
-            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
-
-            adjPoint = currPoint;
-            adjPoint.x -= 1u;
-            adjPoint.y += 1u;
-            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
-
-            adjPoint = currPoint;
-            adjPoint.x -= 1u;
+            adjPoint.y -= 1u;
             if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
 
             adjPoint = currPoint;
@@ -123,12 +119,21 @@ std::vector<nano::Point> nano::Analyser::checkPixel(int x, int y, bool* checkArr
             if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
 
             adjPoint = currPoint;
-            adjPoint.y -= 1u;
+            adjPoint.x -= 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.x -= 1u;
+            adjPoint.y += 1u;
+            if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
+
+            adjPoint = currPoint;
+            adjPoint.y += 1u;
             if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
 
             adjPoint = currPoint;
             adjPoint.x += 1u;
-            adjPoint.y +- 1u;
+            adjPoint.y += 1u;
             if(adjPoint.x < mask.width && adjPoint.x >= 0 && adjPoint.y < mask.height && adjPoint.y >= 0 && !checkArray[adjPoint.x + adjPoint.y * mask.width]) pointsStack.push(adjPoint);
         }
     }
@@ -188,6 +193,7 @@ void nano::Analyser::startExtremumAnalysis()
             UI::inst().printLine("<<<<< Results >>>>>");
             UI::inst().printLine("Extremum threshold = " + UI::inst().floatToString(extremumThreshold, 3u));
             UI::inst().printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
+            UI::inst().printLine("Min pixels in nanotube = " + std::to_string(minPixelsInTube));
             UI::inst().printLine("Pixel size = " + UI::inst().floatToString(pixelSize_nm, 3u) + " (nm)");
             UI::inst().printLine("Image area = " + UI::inst().floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
             UI::inst().printLine("Nanotube density = " + UI::inst().floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
@@ -210,6 +216,7 @@ void nano::Analyser::startManualAnalysis(float threshold)
     UI::inst().printLine("<<<<< Results >>>>>");
     UI::inst().printLine("Number of tubes = " + std::to_string(nanotubes.size()));
     UI::inst().printLine("Threshold = " + UI::inst().floatToString(threshold, 3u));
+    UI::inst().printLine("Min pixels in nanotube = " + std::to_string(minPixelsInTube));
     UI::inst().printLine("Pixel size = " + UI::inst().floatToString(pixelSize_nm, 3u) + " (nm)");
     UI::inst().printLine("Image area = " + UI::inst().floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
     UI::inst().printLine("Nanotube density = " + UI::inst().floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
@@ -218,6 +225,11 @@ void nano::Analyser::startManualAnalysis(float threshold)
 const raylib::Image* nano::Analyser::getMask() const
 {
     return &mask;
+}
+
+const raylib::Image* nano::Analyser::getTubeMask() const
+{
+    return &tubeMask;
 }
 
 const std::vector<nano::Nanotube>* nano::Analyser::getTubes() const
@@ -238,7 +250,7 @@ float nano::Analyser::getProgress() const
 float nano::Analyser::getImageArea()
 {
     assert(targetImg);
-    return static_cast<float>(targetImg->GetWidth()) * pixelSize_nm * static_cast<float>(targetImg->GetHeight()) * (int)pixelSize_nm;
+    return static_cast<float>(targetImg->GetWidth()) * pixelSize_nm * static_cast<float>(targetImg->GetHeight()) * pixelSize_nm;
 }
 
 float nano::Analyser::getDensity()
@@ -250,6 +262,7 @@ void nano::Analyser::resetAll()
 {
     targetImg = nullptr;
     mask.Unload();
+    tubeMask.Unload();
     progressReport = 0.0f;
     pixelSize_nm = 0.0f;
     nanotubes.clear();

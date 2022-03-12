@@ -39,7 +39,8 @@ void nano::App::setDroppedImg()
         if(maskTexture)
         {
             delete maskTexture;
-            maskTexture = nullptr;
+            delete tubeMaskTexture;
+            maskTexture = tubeMaskTexture = nullptr;
         }
         std::cout << "Dropped file path: " << path << std::endl;
         cameraPosition = raylib::Vector2::Zero();
@@ -81,6 +82,7 @@ int nano::App::run(int windowWidth, int windowHeight, const char* windowName)
             worker.join();
             workerIsDone = calculating = false;
             setMaskTexture();
+            setTubeMaskTexture();
         }
         //--------------//
 
@@ -92,6 +94,7 @@ int nano::App::run(int windowWidth, int windowHeight, const char* windowName)
 
             if(currTexture) currTexture->Draw(cameraPosition, 0.0f, cameraZoom);
             if(maskTexture && maskVisible) maskTexture->Draw(cameraPosition, 0.0f, cameraZoom);
+            if(tubeMaskTexture && tubeMaskVisible) tubeMaskTexture->Draw(cameraPosition, 0.0f, cameraZoom);
 
             prim::Debug::draw(RED);
             
@@ -99,7 +102,7 @@ int nano::App::run(int windowWidth, int windowHeight, const char* windowName)
         }
         EndDrawing();
 
-        //--------------//
+        //--------------//s
     }
 
     return 0;
@@ -139,6 +142,7 @@ void nano::App::startExtremumAnalysis()
     }
     
     maskVisible = false;
+    tubeMaskVisible = false;
 
     calculating = true;
     UI::inst().consoleVisible = true;
@@ -177,7 +181,8 @@ void nano::App::cancelAnalysis()
         if(maskTexture)
         {
             delete maskTexture;
-            maskTexture = nullptr;
+            delete tubeMaskTexture;
+            maskTexture = tubeMaskTexture = nullptr;
         }
     }
 }
@@ -199,9 +204,27 @@ void nano::App::setMaskTexture()
     }
 }
 
+void nano::App::setTubeMaskTexture()
+{
+    if(analyser.getTubeMask()->IsReady())
+    {
+        if(tubeMaskTexture)
+        {
+            tubeMaskTexture->Update(analyser.getTubeMask()->GetData());
+        }
+        else
+        {
+            tubeMaskTexture = new raylib::Texture(*analyser.getTubeMask());
+        }
+
+        tubeMaskVisible = true;
+    }
+}
+
 void nano::App::free()
 {
     if(currTexture) delete currTexture;
     if(maskTexture) delete maskTexture;
+    if(tubeMaskTexture) delete tubeMaskTexture;
     if(worker.joinable()) worker.join();
 }

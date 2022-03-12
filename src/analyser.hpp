@@ -13,7 +13,9 @@ class Analyser
 private:
     const raylib::Image* targetImg = nullptr;
     raylib::Image mask;
+    raylib::Image tubeMask;
     const raylib::Color maskColorPos = { 0, 230, 0, 180 };
+    const raylib::Color tubeMaskColorPos = { 230, 0, 0, 180 };
     const raylib::Color maskColorNeg = { 0, 0, 0, 0 };
     float progressReport = 0.0f;
     std::vector<Nanotube> nanotubes;
@@ -41,6 +43,7 @@ public:
     void startExtremumAnalysis();
     void startManualAnalysis(float threshold);
     const raylib::Image* getMask() const;
+    const raylib::Image* getTubeMask() const;
     const std::vector<Nanotube>* getTubes() const;
     float getProgress() const;
     float getImageArea();
