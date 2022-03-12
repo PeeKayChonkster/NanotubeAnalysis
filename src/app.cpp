@@ -8,6 +8,7 @@
 #include "app.hpp"
 #include "debug.hpp"
 #include "ui.hpp"
+#include "prim_exception.hpp"
 
 
 int nano::App::init(int windowWidth, int widnowHeight, const char* windowName)

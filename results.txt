@@ -1,0 +1,38 @@
+
+<<<<< Starting analysis >>>>>
+Image: /media/prim/PrimUsb/Дипломная/SamplesJPEG/S2-ZnAl_04.jpg
+Threshold = 1.000; Nanotubes = 0
+Threshold = 0.980; Nanotubes = 0
+Threshold = 0.960; Nanotubes = 0
+Threshold = 0.940; Nanotubes = 0
+Threshold = 0.920; Nanotubes = 0
+Threshold = 0.900; Nanotubes = 0
+Threshold = 0.880; Nanotubes = 0
+Threshold = 0.860; Nanotubes = 4
+Threshold = 0.840; Nanotubes = 15
+Threshold = 0.820; Nanotubes = 32
+Threshold = 0.800; Nanotubes = 47
+Threshold = 0.780; Nanotubes = 121
+Threshold = 0.760; Nanotubes = 156
+Threshold = 0.740; Nanotubes = 211
+Threshold = 0.720; Nanotubes = 276
+Threshold = 0.700; Nanotubes = 321
+Threshold = 0.680; Nanotubes = 379
+Threshold = 0.660; Nanotubes = 431
+Threshold = 0.640; Nanotubes = 469
+Threshold = 0.620; Nanotubes = 507
+Threshold = 0.600; Nanotubes = 536
+Threshold = 0.580; Nanotubes = 579
+Threshold = 0.560; Nanotubes = 605
+Threshold = 0.540; Nanotubes = 624
+Threshold = 0.520; Nanotubes = 636
+Threshold = 0.500; Nanotubes = 624
+Threshold = 0.480; Nanotubes = 622
+Threshold = 0.460; Nanotubes = 596
+Threshold = 0.440; Nanotubes = 585
+Threshold = 0.420; Nanotubes = 558
+<<<<< Results >>>>>
+Extremum threshold = 0.520
+Extremum number of tubes = 636
+Image area = 0.000 (mm2)
+Nanotube density = inf (1/mm2)

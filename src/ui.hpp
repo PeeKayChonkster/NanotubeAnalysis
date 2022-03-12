@@ -18,6 +18,14 @@ private:
     ImGuiIO* io;
 
     void processControls();
+
+    // helper draw functions
+    void drawMainMenu();
+    void drawDropInstructions();
+    void drawExtremumAnalysisConfig();
+    void drawCalculatingProgressbar();
+    void drawConsole();
+    void drawAlertWindow();
 public:
     UI();
     ~UI();
