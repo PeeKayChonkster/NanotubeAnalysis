@@ -19,12 +19,13 @@ nano::Analyser::Analyser(const raylib::Image* targetImg): targetImg(targetImg), 
 void nano::Analyser::setTargetImg(const raylib::Image* targetImg)
 {
     this->targetImg = targetImg;
-    mask = raylib::Image(targetImg->width, targetImg->height, maskColorNeg);
 }
 
 void nano::Analyser::calculateMask(float threshold)
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to calculate mask without target image.");
+    if(!mask.IsReady()) mask = raylib::Image(targetImg->width, targetImg->height, maskColorNeg);
+
     uint32_t numberOfPixels = targetImg->width * targetImg->height;
 
     for(int y = 0; y < targetImg->height; ++y)
@@ -48,6 +49,7 @@ void nano::Analyser::calculateMask(float threshold)
 void nano::Analyser::scanMaskForTubes()
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to scan mask without target image.");
+    if(!mask.IsReady()) throw PRIM_EXCEPTION("Trying to scan mask for tubes before creating mask.");
     setProgress(0.0f);
     nanotubes.clear();
     uint32_t numberOfPixels = targetImg->width * targetImg->height;
@@ -148,6 +150,16 @@ void nano::Analyser::findExtremum()
     UI::inst().printLine("Threshold = " + UI::inst().floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
     while(true)
     {
+        if(analysisCancelled)
+        {
+            analysisCancelled = false;
+            progressReport = 0.0f;
+            mask.Unload();
+            nanotubes.clear();
+            UI::inst().printLine("<<<<< Analysis cancelled >>>>>");
+            return;
+        }
+
         threshold -= extremumDeltaStep;
         calculateMask(threshold);
         scanMaskForTubes();
@@ -230,4 +242,9 @@ void nano::Analyser::resetAll()
 bool nano::Analyser::areTubesCalculated() const
 {
     return !nanotubes.empty();
+}
+
+void nano::Analyser::cancelAnalysis()
+{
+    analysisCancelled = true;
 }

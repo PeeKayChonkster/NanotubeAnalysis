@@ -23,7 +23,7 @@ private:
     void drawMainMenu();
     void drawDropInstructions();
     void drawExtremumAnalysisConfig();
-    void drawCalculatingProgressbar();
+    void drawCalculateProgressbar();
     void drawConsole();
     void drawAlertWindow();
 public:

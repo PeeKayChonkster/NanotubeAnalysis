@@ -77,7 +77,7 @@ void nano::UI::draw()
         drawMainMenu();
         drawDropInstructions();
         drawExtremumAnalysisConfig();
-        drawCalculatingProgressbar();
+        drawCalculateProgressbar();
         drawConsole();
         drawAlertWindow();
         
@@ -187,7 +187,7 @@ void nano::UI::drawExtremumAnalysisConfig()
     }
 }
 
-void nano::UI::drawCalculatingProgressbar()
+void nano::UI::drawCalculateProgressbar()
 {
     if(App::calculating)
     {
@@ -196,8 +196,13 @@ void nano::UI::drawCalculatingProgressbar()
         //ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetStyleColorVec4(ImGuiCol_TitleBg));
         ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
         ImGui::SetNextWindowSize(ImVec2(center.x * 0.5f, 0.0f), ImGuiCond_Appearing);
-        ImGui::Begin("Calculating...", NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
+        ImGui::Begin("Calculating...", NULL,ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav);
         ImGui::ProgressBar(App::analyser.getProgress());
+        if(ImGui::Button("Cancel"))
+        {
+            alert("Process canceled.");
+            App::cancelAnalysis();
+        }
         //ImGui::PopStyleColor(2);
         ImGui::End();
     }

@@ -20,6 +20,8 @@ private:
 
     std::vector<Point> checkPixel(int x, int y, bool* checkArray);
     void setProgress(float prog);
+
+    bool analysisCancelled = false;
 public:
     Analyser();
     Analyser(const raylib::Image* targetImg);
@@ -43,6 +45,7 @@ public:
     float getImageArea();
     float getDensity();
     bool areTubesCalculated() const;
+    void cancelAnalysis();
 
     void resetAll();
 };

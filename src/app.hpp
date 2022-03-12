@@ -43,6 +43,7 @@ private:
 
     static void processControls();
     static void startAnalysis();
+    static void cancelAnalysis();
 
     friend class UI;
 

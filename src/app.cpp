@@ -38,7 +38,6 @@ void nano::App::setDroppedImg()
         analyser.setTargetImg(&currImg);
         if(maskTexture)
         {
-            maskTexture->Unload();
             delete maskTexture;
             maskTexture = nullptr;
         }
@@ -138,12 +137,14 @@ void nano::App::startAnalysis()
         return;
     }
     
+    maskVisible = false;
+
     calculating = true;
     UI::inst().consoleVisible = true;
 
     UI::inst().printLine("<<<<< Starting analysis >>>>>");
     UI::inst().printLine("Image: " + currImgPath);
-   
+
     auto workerLambda = []() {
             analyser.findExtremum();
             workerIsDone = true;
@@ -151,15 +152,33 @@ void nano::App::startAnalysis()
     worker = std::thread(workerLambda);
 }
 
+void nano::App::cancelAnalysis()
+{
+    if(calculating)
+    {
+        analyser.cancelAnalysis();
+        if(maskTexture)
+        {
+            delete maskTexture;
+            maskTexture = nullptr;
+        }
+    }
+}
+
 void nano::App::setMaskTexture()
 {
-    if(maskTexture)
+    if(analyser.getMask()->IsReady())
     {
-        maskTexture->Update(analyser.getMask()->GetData());
-    }
-    else
-    {
-        maskTexture = new raylib::Texture(*analyser.getMask());
+        if(maskTexture)
+        {
+            maskTexture->Update(analyser.getMask()->GetData());
+        }
+        else
+        {
+            maskTexture = new raylib::Texture(*analyser.getMask());
+        }
+
+        maskVisible = true;
     }
 }
 
