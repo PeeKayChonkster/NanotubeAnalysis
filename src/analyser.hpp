@@ -11,7 +11,6 @@ namespace nano
 class Analyser
 {
 private:
-    class App* parentApp = nullptr;
     const raylib::Image* targetImg = nullptr;
     raylib::Image mask;
     const raylib::Color maskColorPos = { 0, 230, 0, 180 };
@@ -22,8 +21,8 @@ private:
     std::vector<Point> checkPixel(int x, int y, bool* checkArray);
     void setProgress(float prog);
 public:
-    Analyser(App* parentApp);
-    Analyser(class App* parentApp, const raylib::Image* targetImg);
+    Analyser();
+    Analyser(const raylib::Image* targetImg);
     Analyser(const Analyser& other) = delete;
 
     // analysis config

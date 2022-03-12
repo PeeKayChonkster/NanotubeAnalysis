@@ -1,16 +1,16 @@
 #include "analyser.hpp"
 #include "prim_exception.hpp"
 #include "app.hpp"
-#include <raygui.h>
+#include "ui.hpp"
 #include <stack>
 #include <iostream>
 #include <cassert>
 
 
 
-nano::Analyser::Analyser(App* parentApp): parentApp(parentApp), targetImg(nullptr) { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
+nano::Analyser::Analyser() { mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1); }
 
-nano::Analyser::Analyser(App* parentApp, const raylib::Image* targetImg): parentApp(parentApp), targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
+nano::Analyser::Analyser(const raylib::Image* targetImg): targetImg(targetImg), mask(targetImg->width, targetImg->height, maskColorNeg), nanotubes()
 {
     mask.Format(PIXELFORMAT_UNCOMPRESSED_R5G5B5A1);
     setTargetImg(targetImg);
@@ -145,14 +145,14 @@ void nano::Analyser::findExtremum()
     uint8_t stopFlag = 0u;
     uint32_t currNumberOfTubes = nanotubes.size();
     uint32_t prevNumberOfTubes = currNumberOfTubes;
-    parentApp->printLine("Threshold = " + App::floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
+    UI::inst().printLine("Threshold = " + UI::inst().floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
     while(true)
     {
         threshold -= extremumDeltaStep;
         calculateMask(threshold);
         scanMaskForTubes();
         currNumberOfTubes = nanotubes.size();
-        parentApp->printLine("Threshold = " + App::floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
+        UI::inst().printLine("Threshold = " + UI::inst().floatToString(threshold, 3u) + "; Nanotubes = " + std::to_string(currNumberOfTubes));
 
         if(currNumberOfTubes <= prevNumberOfTubes && currNumberOfTubes > 0u)    // derivative is negative
         {
@@ -172,11 +172,11 @@ void nano::Analyser::findExtremum()
             calculateMask(extremumThreshold);
             scanMaskForTubes();
 
-            parentApp->printLine("<<<<< Results >>>>>");
-            parentApp->printLine("Extremum threshold = " + App::floatToString(extremumThreshold, 3u));
-            parentApp->printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
-            parentApp->printLine("Image area = " + App::floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
-            parentApp->printLine("Nanotube density = " + App::floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
+            UI::inst().printLine("<<<<< Results >>>>>");
+            UI::inst().printLine("Extremum threshold = " + UI::inst().floatToString(extremumThreshold, 3u));
+            UI::inst().printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
+            UI::inst().printLine("Image area = " + UI::inst().floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
+            UI::inst().printLine("Nanotube density = " + UI::inst().floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
             return;
         }
         else                                                                    // resume analysis

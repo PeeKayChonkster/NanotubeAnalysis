@@ -4,6 +4,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <limits>
+#include <algorithm>
 
 
 namespace ImGui

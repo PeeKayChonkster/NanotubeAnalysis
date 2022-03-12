@@ -1,14 +1,8 @@
 #ifndef APP_HPP
 #define APP_HPP
 
-#include <raylib-cpp.hpp>
-#include "nanotube.hpp"
 #include "analyser.hpp"
-#include <memory>
-#include <algorithm>
 #include <thread>
-#include <imgui.h>
-#include <cassert>
 
 // #define WHITE { 1.0f, 1.0f, 1.0f, 1.0f }
 // #define BLACK { 0.0f, 0.0f, 0.0f, 1.0f }
@@ -21,64 +15,44 @@
 namespace nano
 {
 
-enum ConfigValue { PixelSize, DeltaStep, OverflowTolerance };
-
 class App
 {
 private:
-    raylib::Window window;
-    raylib::Image currImg;
-    std::string currImgPath;
-    raylib::Texture* currTexture = nullptr;
-    raylib::Texture* maskTexture = nullptr;
-    Analyser analyser;
-    raylib::Vector2 cameraPosition {};
-    float cameraZoom = 1.0f;
-    const float defaultFontSize = 18.0f;
-    ImFont* defaultFont = nullptr;
-    std::thread worker;
-    ImGuiTextBuffer consoleBuffer;
-    std::string alertText;
-    const float tooltipDelay = 1.0f;
+    static inline raylib::Window window;
+    static inline raylib::Image currImg;
+    static inline std::string currImgPath;
+    static inline raylib::Texture* currTexture = nullptr;
+    static inline raylib::Texture* maskTexture = nullptr;
+    static inline Analyser analyser;
+    static inline raylib::Vector2 cameraPosition;
+    static inline float cameraZoom = 1.0f;
+    static inline std::thread worker;
+
 
     // flags
-    bool workerIsDone = false;
-    bool calculating = false;
-    bool menuVisible = false;
-    bool alertWindowVisible = false;
-    bool consoleVisible = false;
-    bool consoleScrollToBottom = false;
-    bool clearConsole = false;
-    bool consoleToFile = false;
-    bool maskVisible = true;
-    bool extremumAnalysisConfigVisible = false;
+    static inline bool workerIsDone = false;
+    static inline bool calculating = false;
+    static inline bool maskVisible = true;
     //
 
-    char inputThreshold[4] {0};
-    bool calculateButtonPressed = false;
-    const uint8_t uiFontSize = 20;
-    raylib::Font uiFont;
+    static int init(int windowWidth, int windowHeight, const char* windowName);
+    static void setDroppedImg();
+    static void setWindowSize(raylib::Vector2 size);
 
-    int init();
-    void drawUI();
-    void setDroppedImg();
-    void setWindowSize(raylib::Vector2 size);
-    void alert(std::string message);
-    void setMaskTexture();
+    static void setMaskTexture();
 
-    void processControls();
-    void startAnalysis();
+    static void processControls();
+    static void startAnalysis();
 
-public:
-    App(int windowWidth, int widnowHeight, const char* windowName);
+    friend class UI;
+
+    App() = delete;
     App(const App& other) = delete;
-
-    int run();
-    void free();
-    void print(std::string line);
-    void printLine(std::string line);
-    static std::string floatToString(float f, uint8_t precision);
+public:
+    static int run(int windowWidth, int widnowHeight, const char* windowName);
+    static void free();
 };
 
 } // namespace nano
+
 #endif // APP_HPP

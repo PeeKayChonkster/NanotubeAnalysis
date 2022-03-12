@@ -9,23 +9,25 @@
 
 int main()
 {
-    nano::App app(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
     int exitcode = 0;
     try
     {
-        int exitcode = app.run();
+        int exitcode = nano::App::run(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
     }
     catch(const prim::Exception& e)
     {
         std::cerr << e.what() << '\n';
-        app.free();
+        std::cin.get();
+        exitcode = 1;
     }
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
-        app.free();
+        std::cin.get();
+        exitcode = 1;
     }
     
+    nano::App::free();
 
     return exitcode;
 }
