@@ -38,7 +38,8 @@ public:
     void setTargetImg(const raylib::Image* targetImg);
     void calculateMask(float threshold);
     void scanMaskForTubes();
-    void findExtremum();
+    void startExtremumAnalysis();
+    void startManualAnalysis(float threshold);
     const raylib::Image* getMask() const;
     const std::vector<Nanotube>* getTubes() const;
     float getProgress() const;

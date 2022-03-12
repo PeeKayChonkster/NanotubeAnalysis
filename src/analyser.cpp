@@ -136,9 +136,10 @@ std::vector<nano::Point> nano::Analyser::checkPixel(int x, int y, bool* checkArr
     return std::move(resultPoints);
 }
 
-void nano::Analyser::findExtremum()
+void nano::Analyser::startExtremumAnalysis()
 {
     if(!targetImg) throw PRIM_EXCEPTION("Trying to find nanotube extremum without target image.");
+    setProgress(0.0f);
     float threshold = 1.0f;
     float extremumThreshold = 1.0f;
     uint32_t extremumNumberOfTubes = 0u;
@@ -187,6 +188,7 @@ void nano::Analyser::findExtremum()
             UI::inst().printLine("<<<<< Results >>>>>");
             UI::inst().printLine("Extremum threshold = " + UI::inst().floatToString(extremumThreshold, 3u));
             UI::inst().printLine("Extremum number of tubes = " + std::to_string(extremumNumberOfTubes));
+            UI::inst().printLine("Pixel size = " + UI::inst().floatToString(pixelSize_nm, 3u) + " (nm)");
             UI::inst().printLine("Image area = " + UI::inst().floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
             UI::inst().printLine("Nanotube density = " + UI::inst().floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
             return;
@@ -197,6 +199,20 @@ void nano::Analyser::findExtremum()
         }
     }
     
+}
+
+void nano::Analyser::startManualAnalysis(float threshold)
+{
+    setProgress(0.0f);
+    nanotubes.clear();
+    calculateMask(threshold);
+    scanMaskForTubes();
+    UI::inst().printLine("<<<<< Results >>>>>");
+    UI::inst().printLine("Number of tubes = " + std::to_string(nanotubes.size()));
+    UI::inst().printLine("Threshold = " + UI::inst().floatToString(threshold, 3u));
+    UI::inst().printLine("Pixel size = " + UI::inst().floatToString(pixelSize_nm, 3u) + " (nm)");
+    UI::inst().printLine("Image area = " + UI::inst().floatToString(getImageArea() * 0.000001, 3u) + " (mm2)");
+    UI::inst().printLine("Nanotube density = " + UI::inst().floatToString(getDensity() * 1000000.0f, 3u) + " (1/mm2)\n");
 }
 
 const raylib::Image* nano::Analyser::getMask() const

@@ -42,7 +42,8 @@ private:
     static void setMaskTexture();
 
     static void processControls();
-    static void startAnalysis();
+    static void startExtremumAnalysis();
+    static void startManualAnalysis(float threshold);
     static void cancelAnalysis();
 
     friend class UI;

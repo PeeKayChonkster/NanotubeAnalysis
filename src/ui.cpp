@@ -80,6 +80,7 @@ void nano::UI::draw()
         drawCalculateProgressbar();
         drawConsole();
         drawAlertWindow();
+        drawManualAnalysisConfig();
         
         ImGui::PopFont();
     }
@@ -135,6 +136,12 @@ void nano::UI::drawMainMenu()
             menuVisible = false;
         }
         ImGui::SameLine();
+        if(App::currImg.IsReady() && ImGui::Button("Start manual analysis"))
+        {
+            manualAnalysisConfigVisible = !manualAnalysisConfigVisible;
+            menuVisible = false;
+        }
+        ImGui::SameLine();
         if(ImGui::Button("Console")) consoleVisible = !consoleVisible;
         ImGui::SetTooltipD("show/hide console", 1.0f);
         if(App::maskTexture && ImGui::Button("Mask")) App::maskVisible = !App::maskVisible;
@@ -180,7 +187,7 @@ void nano::UI::drawExtremumAnalysisConfig()
             if(ImGui::Button("Start"))
             {
                 extremumAnalysisConfigVisible = false;
-                App::startAnalysis();
+                App::startExtremumAnalysis();
             }
         }
         ImGui::End();
@@ -261,5 +268,41 @@ void nano::UI::drawAlertWindow()
             ImGui::EndPopup();
         }
 
+    }
+}
+
+void nano::UI::drawManualAnalysisConfig()
+{
+    if(manualAnalysisConfigVisible)
+    {
+        static float manualThreshold = 1.0f;
+        ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+        ImGui::Begin("Manual analysis config", &manualAnalysisConfigVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+        {
+            ImGui::PushItemWidth(150.0f);
+            if(App::currImg.IsReady())
+            {
+                if(ImGui::DragFloat("Threshold", &manualThreshold, 0.0002f, 0.0f, 1.0f))
+                {
+                    App::analyser.calculateMask(manualThreshold);
+                    App::setMaskTexture();
+                }
+
+                ImGui::InputFloatClamped("Pixel size (nm)", &App::analyser.pixelSize_nm, 0.0f);
+                ImGui::InputIntClamped("Min pixels in nanotube", &App::analyser.minPixelsInTube, 0);
+            }
+            else
+            {
+                ImGui::Text("No image to analyse!");
+            }
+            ImGui::PopItemWidth();
+            if(ImGui::Button("Start"))
+            {
+                //manualAnalysisConfigVisible = false;
+                App::startManualAnalysis(manualThreshold);
+            }
+        }
+        ImGui::End();
     }
 }

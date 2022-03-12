@@ -26,6 +26,8 @@ private:
     void drawCalculateProgressbar();
     void drawConsole();
     void drawAlertWindow();
+    void drawManualAnalysisConfig();
+    //
 public:
     UI();
     ~UI();
@@ -45,6 +47,7 @@ public:
     bool clearConsole = false;
     bool consoleToFile = false;
     bool extremumAnalysisConfigVisible = false;
+    bool manualAnalysisConfigVisible = false;
     //
 };
 

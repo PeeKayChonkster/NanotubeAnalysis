@@ -44,6 +44,7 @@ void nano::App::setDroppedImg()
         std::cout << "Dropped file path: " << path << std::endl;
         cameraPosition = raylib::Vector2::Zero();
         cameraZoom = 1.0f;
+        UI::inst().menuVisible = true;
         ClearDroppedFiles();
     }
 }
@@ -129,7 +130,7 @@ void nano::App::processControls()
    
 }
 
-void nano::App::startAnalysis()
+void nano::App::startExtremumAnalysis()
 {
     if(!currImg.IsReady())
     {
@@ -142,13 +143,29 @@ void nano::App::startAnalysis()
     calculating = true;
     UI::inst().consoleVisible = true;
 
-    UI::inst().printLine("<<<<< Starting analysis >>>>>");
+    UI::inst().printLine("<<<<< Starting extremum analysis >>>>>");
     UI::inst().printLine("Image: " + currImgPath);
 
     auto workerLambda = []() {
-            analyser.findExtremum();
+            analyser.startExtremumAnalysis();
             workerIsDone = true;
         };
+    worker = std::thread(workerLambda);
+}
+
+void nano::App::startManualAnalysis(float threshold)
+{
+    threshold = std::clamp(threshold, 0.0f, 1.0f);
+    calculating = true;
+    UI::inst().consoleVisible = true;
+    
+    UI::inst().printLine("<<<<< Starting manual analysis >>>>>");
+    UI::inst().printLine("Image: " + currImgPath);
+
+    auto workerLambda = [threshold]() {
+        analyser.startManualAnalysis(threshold);
+        workerIsDone = true;
+    };
     worker = std::thread(workerLambda);
 }
 
